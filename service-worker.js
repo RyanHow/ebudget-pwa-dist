@@ -8,7 +8,7 @@
 importScripts('./build/sw-toolbox.js');
 
 self.toolbox.options.cache = {
-  name: 'ionic-cache'
+  name: 'eBudget-cache-0.0.17'
 };
 
 // pre-cache our key assets
