@@ -15,14 +15,11 @@
 
               // updatefound is fired if service-worker.js changes.
               registration.onupdatefound = function() {
-                console.trace('onupdatefound enter');
                 // The updatefound event implies that registration.installing is set; see
                 // https://slightlyoff.github.io/ServiceWorker/spec/service_worker/index.html#service-worker-container-updatefound-event
                 var installingWorker = registration.installing;
 
                 installingWorker.onstatechange = function() {
-                  console.trace('onstatechage enter');
-                  console.debug('Installing Worker State: ' + installingWorker.state);
                   switch (installingWorker.state) {
                     case 'installed':
                       if (navigator.serviceWorker.controller) {
@@ -47,9 +44,7 @@
                       console.error('The installing service worker became redundant.');
                     break;
                   }
-                  console.trace('onstatechage exit');
                 };
-                console.trace('onupdatefound exit');
             };        
         })
         .catch(err => console.log('Service Worker Error', err));
