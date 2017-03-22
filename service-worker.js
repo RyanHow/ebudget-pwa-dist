@@ -8,7 +8,7 @@
 importScripts('./build/sw-toolbox.js');
 
 self.toolbox.options.cache = {
-  name: 'eBudget-cache-0.0.36'
+  name: 'eBudget-cache-0.0.37'
 };
 
 // pre-cache our key assets

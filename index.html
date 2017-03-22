@@ -10,7 +10,7 @@
       navigator.serviceWorker.register('service-worker.js')
         .then((registration) => {
               if (typeof registration.update == 'function') {
-                window.serviceWorkerUpdateCheckFunction = registration.update;
+                window.serviceWorkerUpdateCheckFunction = () => registration.update();
               }
 
               // updatefound is fired if service-worker.js changes.
