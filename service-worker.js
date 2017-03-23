@@ -7,16 +7,23 @@
 'use strict';
 importScripts('./build/sw-toolbox.js');
 
-self.version = '0.0.43';
+self.version = '0.0.44';
 
 self.toolbox.options.cache = {
-  name: 'eBudget-cache-%BUILD_INFO_VERSION%'
+  name: 'eBudget-cache-' + self.version
 };
 
 self.addEventListener('install', function(event){
   console.log('installed! ' + self.version);
   send_message_to_all_clients(self.version + 'installed');
 });
+
+
+self.addEventListener('message', function(event){
+    console.log("SW Received Message: " + event.data);
+    event.ports[0].postMessage("SW Says 'Hello back!'");
+});
+
 
 // Delete old caches
 this.addEventListener('activate', function(event) {
@@ -25,7 +32,7 @@ this.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(keyList) {
       return Promise.all(keyList.map(function(key) {
-        if (key === self.toolbox.options.cache.name) {
+        if (key !== self.toolbox.options.cache.name) {
           return caches.delete(key);
         }
       }));

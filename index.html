@@ -12,6 +12,8 @@
         console.log('Message from service worker: ' + JSON.stringify(event.data));
       });
 
+      navigator.serviceWorker.controller.postMessage("Client says 'What version are you?'"); // TODO: Channel to get a reply...
+
       navigator.serviceWorker.register('service-worker.js')
         .then((registration) => {
               if (typeof registration.update == 'function') {
@@ -33,6 +35,8 @@
                         // It's the perfect time to display a "New content is available; please refresh."
                         // message in the page's interface.
                         console.log('New or updated content is available.');
+                        installingWorker.controller.postMessage("Client says 'New SW, What version are you?'");
+
                         window.serviceWorkerUpdateAvailable = true;                        
                         window.dispatchEvent(new CustomEvent('serviceworkerupdateavailable', {installing: installingWorker}));
                       } else {
