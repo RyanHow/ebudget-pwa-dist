@@ -71,6 +71,7 @@
 
                         // This is a new service worker where it is previously uncontrolled by a service worker
                         // So don't do anything here, the service worker will silently take over next time...
+                        window.dispatchEvent(new CustomEvent('serviceworkerinstalled', {serviceWorker: installingWorker}));
 
 
                       }
