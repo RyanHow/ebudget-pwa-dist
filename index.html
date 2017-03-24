@@ -19,7 +19,7 @@
                   var p = registration.update();
                   if (p && p.catch) {
                     p.catch((reason) => {
-                      log.console("Error in service worker update: " + reason);
+                      console.log("Error in service worker update: " + reason);
                     });
                   }
                 }
