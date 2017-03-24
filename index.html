@@ -15,7 +15,14 @@
       navigator.serviceWorker.register('service-worker.js')
         .then((registration) => {
               if (typeof registration.update == 'function') {
-                window.serviceWorkerUpdateCheckFunction = () => registration.update();
+                window.serviceWorkerUpdateCheckFunction = () => {
+                  var p = registration.update();
+                  if (p && p.catch) {
+                    p.catch((reason) => {
+                      log.console("Error in service worker update: " + reason);
+                    });
+                  }
+                }
               }
               if (typeof registration.unregister == 'function') {
                 window.serviceWorkerUnregisterFunction = () => registration.unregister();
