@@ -22,6 +22,7 @@
                 var channel = new MessageChannel();
 
                 channel.port1.onmessage = (event) => {
+                  console.log("Received version from service worker: " + event.data.version);
                   window.activeServiceWorkerVersion = event.data.version;
                   window.dispatchEvent(new CustomEvent('serviceworkerversion', {version: event.data.version, serviceWorker: navigator.serviceWorker}));
                 };
@@ -49,6 +50,7 @@
                         var channel2 = new MessageChannel();
 
                         channel2.port1.onmessage = (event) => {
+                          console.log("Received version from installing service worker: " + event.data.version);
                           window.updatedServiceWorkerVersion = event.data.version;
                           window.dispatchEvent(new CustomEvent('updatedserviceworkerversion', {version: event.data.version, serviceWorker: navigator.serviceWorker}));
                         };

@@ -7,7 +7,7 @@
 'use strict';
 importScripts('./build/sw-toolbox.js');
 
-self.version = '0.0.49';
+self.version = '0.0.50';
 
 self.toolbox.options.cache = {
   name: 'eBudget-cache-' + self.version
@@ -20,8 +20,9 @@ self.addEventListener('install', function(event){
 
 
 self.addEventListener('message', function(event){
-    console.log("SW Received Message: " + event.data);
+    console.log("SW Received Message: " + JSON.stringify(event.data));
     if (event.data.versionCheck) {
+      console.log("SW posting version " + self.version);
       event.ports[0].postMessage({version: self.version});      
     }
 });
