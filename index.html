@@ -17,6 +17,9 @@
               if (typeof registration.update == 'function') {
                 window.serviceWorkerUpdateCheckFunction = () => registration.update();
               }
+              if (typeof registration.unregister == 'function') {
+                window.serviceWorkerUnregisterFunction = () => registration.unregister();
+              }
 
               if (navigator.serviceWorker.controller) {
                 var channel = new MessageChannel();
