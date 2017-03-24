@@ -46,16 +46,16 @@
                         // It's the perfect time to display a "New content is available; please refresh."
                         // message in the page's interface.
                         console.log('New or updated content is available.');
-                        var channel = new MessageChannel();
+                        var channel2 = new MessageChannel();
 
-                        channel.port1.onmessage = (event) => {
-                          window.activeServiceWorkerVersion = event.data.version;
-                          window.dispatchEvent(new CustomEvent('installingserviceworkerversion', {version: event.data.version, serviceWorker: navigator.serviceWorker}));
+                        channel2.port1.onmessage = (event) => {
+                          window.updatedServiceWorkerVersion = event.data.version;
+                          window.dispatchEvent(new CustomEvent('updatedserviceworkerversion', {version: event.data.version, serviceWorker: navigator.serviceWorker}));
                         };
 
                         console.log("Pinging installing worker for version");
 
-                        installingWorker.controller.postMessage({versionCheck: true}, channel.port2);
+                        installingWorker.postMessage({versionCheck: true}, channel2.port2);
                         window.serviceWorkerUpdateAvailable = true;                        
                         window.dispatchEvent(new CustomEvent('serviceworkerupdateavailable', {installing: installingWorker}));
 
@@ -69,7 +69,7 @@
 
                         // This is a new service worker where it is previously uncontrolled by a service worker
                         // So don't do anything here, the service worker will silently take over next time...
-                        
+
 
                       }
                     break;
