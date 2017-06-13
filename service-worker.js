@@ -7,7 +7,7 @@
 'use strict';
 importScripts('./build/sw-toolbox.js');
 
-self.version = '0.0.100';
+self.version = '%BUILD_INFO_VERSION%';
 
 self.toolbox.options.cache = {
   name: 'eBudget-cache-' + self.version
