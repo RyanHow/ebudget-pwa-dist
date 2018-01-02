@@ -193,9 +193,9 @@ Logger.root.config.addAppender(new LoggerConsoleAppender());
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ionic_native_device__ = __webpack_require__(137);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_persistence_provider_manager__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_persistence_provider_manager__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__logger__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ionic_native_secure_storage__ = __webpack_require__(366);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ionic_native_secure_storage__ = __webpack_require__(367);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -547,12 +547,14 @@ var Configuration = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Dbms; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db__ = __webpack_require__(477);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__persistence_provider_manager__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__persistence_provider_manager__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lokijs__ = __webpack_require__(484);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lokijs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_lokijs__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__transaction_serializer__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__transaction_serializer__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_configuration_service__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_rxjs_Observable__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_rxjs_Observable__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -569,13 +571,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var Dbms = (function () {
     function Dbms(transactionSerializer, persistenceProviderManager, configuration) {
+        var _this = this;
         this.transactionSerializer = transactionSerializer;
         this.configuration = configuration;
         this.persistenceProvider = persistenceProviderManager.provide();
         this.dbs = [];
         this.dbMap = new Map();
+        this._dbInitialisedObservable = new __WEBPACK_IMPORTED_MODULE_7_rxjs_Observable__["Observable"](function (observer) { return _this.dbInitialisedObserver = observer; }).share();
     }
     Dbms.prototype.init = function () {
         var _this = this;
@@ -594,7 +599,11 @@ var Dbms = (function () {
     Dbms.prototype.getDb = function (id) {
         return this.dbMap.get(id);
     };
+    Dbms.prototype.dbInitialisedObservable = function () {
+        return this._dbInitialisedObservable;
+    };
     Dbms.prototype.createDb = function (id) {
+        var _this = this;
         if (!id)
             id = __WEBPACK_IMPORTED_MODULE_5__services_utils__["a" /* Utils */].randomChars(20);
         var db = new __WEBPACK_IMPORTED_MODULE_1__db__["a" /* Db */](id, this, this.persistenceProvider, this.loki, this.transactionSerializer);
@@ -602,11 +611,17 @@ var Dbms = (function () {
         this.dbMap.set(id, db);
         if (!this.initialising) {
             return this.persistenceProvider.addDb(id).then(function () {
-                return db.init().then(function () { return db; });
+                return db.init().then(function () {
+                    _this.dbInitialisedObserver.next(db);
+                    return db;
+                });
             });
         }
         else {
-            return db.init().then(function () { return db; });
+            return db.init().then(function () {
+                _this.dbInitialisedObserver.next(db);
+                return db;
+            });
         }
     };
     Dbms.prototype.deleteDb = function (id) {
@@ -682,8 +697,7 @@ var Utils = (function () {
 
 /***/ }),
 /* 16 */,
-/* 17 */,
-/* 18 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -691,7 +705,7 @@ var Utils = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__engine__ = __webpack_require__(499);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__ = __webpack_require__(9);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -734,44 +748,8 @@ var EngineFactory = (function () {
 //# sourceMappingURL=engine-factory.js.map
 
 /***/ }),
+/* 18 */,
 /* 19 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Transaction; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_record__ = __webpack_require__(44);
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-
-var Transaction = (function (_super) {
-    __extends(Transaction, _super);
-    function Transaction() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Transaction.prototype.tableName = function () {
-        return 'Transaction';
-    };
-    Transaction.prototype.initTable = function (table) {
-        table.ensureUniqueIndex('id');
-    };
-    Transaction.prototype.tableCreationOptions = function () {
-        return { 'indices': ['categoryId'] };
-    };
-    return Transaction;
-}(__WEBPACK_IMPORTED_MODULE_0__db_record__["a" /* Record */]));
-
-//# sourceMappingURL=transaction.js.map
-
-/***/ }),
-/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -780,7 +758,7 @@ var Transaction = (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__logger__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__currency_formatter__ = __webpack_require__(368);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__currency_formatter__ = __webpack_require__(369);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -916,6 +894,43 @@ var Notifications = (function () {
 //# sourceMappingURL=notifications.js.map
 
 /***/ }),
+/* 20 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Transaction; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_record__ = __webpack_require__(44);
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+var Transaction = (function (_super) {
+    __extends(Transaction, _super);
+    function Transaction() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Transaction.prototype.tableName = function () {
+        return 'Transaction';
+    };
+    Transaction.prototype.initTable = function (table) {
+        table.ensureUniqueIndex('id');
+    };
+    Transaction.prototype.tableCreationOptions = function () {
+        return { 'indices': ['categoryId'] };
+    };
+    return Transaction;
+}(__WEBPACK_IMPORTED_MODULE_0__db_record__["a" /* Record */]));
+
+//# sourceMappingURL=transaction.js.map
+
+/***/ }),
 /* 21 */,
 /* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -1040,7 +1055,7 @@ var Account = (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_transaction_serializer__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_transaction_serializer__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_json_stable_stringify__ = __webpack_require__(487);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_json_stable_stringify___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_json_stable_stringify__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__logger__ = __webpack_require__(7);
@@ -1559,22 +1574,59 @@ var Record = (function () {
 //# sourceMappingURL=record.js.map
 
 /***/ }),
-/* 45 */,
+/* 45 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankTransaction; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_record__ = __webpack_require__(44);
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+var BankTransaction = (function (_super) {
+    __extends(BankTransaction, _super);
+    function BankTransaction() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    BankTransaction.prototype.tableName = function () {
+        return 'BankTransaction';
+    };
+    BankTransaction.prototype.initTable = function (table) {
+        table.ensureUniqueIndex('id');
+    };
+    BankTransaction.prototype.tableCreationOptions = function () {
+        //return {'indices': ['categoryId']};
+    };
+    return BankTransaction;
+}(__WEBPACK_IMPORTED_MODULE_0__db_record__["a" /* Record */]));
+
+//# sourceMappingURL=bank-transaction.js.map
+
+/***/ }),
 /* 46 */,
-/* 47 */
+/* 47 */,
+/* 48 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PersistenceProviderManager; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__local_storage_persistence_provider__ = __webpack_require__(480);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__transaction_serializer__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__transaction_serializer__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__sql_storage_persistence_provider__ = __webpack_require__(481);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_sqlite__ = __webpack_require__(245);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_sqlite__ = __webpack_require__(246);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ionic_native_device__ = __webpack_require__(137);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_utils__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__no_persistence_provider__ = __webpack_require__(365);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__no_persistence_provider__ = __webpack_require__(366);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1624,7 +1676,7 @@ var PersistenceProviderManager = (function () {
 //# sourceMappingURL=persistence-provider-manager.js.map
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1688,43 +1740,6 @@ var TransactionSerializer = (function () {
 //# sourceMappingURL=transaction-serializer.js.map
 
 /***/ }),
-/* 49 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankTransaction; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_record__ = __webpack_require__(44);
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-
-var BankTransaction = (function (_super) {
-    __extends(BankTransaction, _super);
-    function BankTransaction() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    BankTransaction.prototype.tableName = function () {
-        return 'BankTransaction';
-    };
-    BankTransaction.prototype.initTable = function (table) {
-        table.ensureUniqueIndex('id');
-    };
-    BankTransaction.prototype.tableCreationOptions = function () {
-        //return {'indices': ['categoryId']};
-    };
-    return BankTransaction;
-}(__WEBPACK_IMPORTED_MODULE_0__db_record__["a" /* Record */]));
-
-//# sourceMappingURL=bank-transaction.js.map
-
-/***/ }),
 /* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1732,20 +1747,20 @@ var BankTransaction = (function (_super) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankSync; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__standard_host_interface__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__transaction_sync__ = __webpack_require__(391);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__transaction_sync__ = __webpack_require__(392);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__bank_provider_registry__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_replication_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__engine_engine_factory__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__in_app_browser_interface_factory__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__in_app_browser_interface_factory__ = __webpack_require__(393);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_rxjs_add_operator_filter__ = __webpack_require__(509);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_rxjs_add_operator_filter___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_rxjs_add_operator_filter__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_rxjs_add_operator_share__ = __webpack_require__(512);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_rxjs_add_operator_share___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_rxjs_add_operator_share__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__bank_link_local__ = __webpack_require__(85);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__bank_sync_monitor__ = __webpack_require__(393);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__bank_sync_monitor__ = __webpack_require__(394);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -2045,10 +2060,10 @@ var BankSync = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_category_category__ = __webpack_require__(367);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_category_category__ = __webpack_require__(368);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_budget__ = __webpack_require__(80);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__modals_add_edit_category_add_edit_category__ = __webpack_require__(138);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__data_transactions_init_category_simple_weekly_transaction__ = __webpack_require__(81);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_logger__ = __webpack_require__(7);
@@ -2476,7 +2491,7 @@ var Autofocus = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ShareBudgetModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ionic_native_clipboard__ = __webpack_require__(244);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ionic_native_clipboard__ = __webpack_require__(245);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_forms__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_map__ = __webpack_require__(476);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_map__);
@@ -2863,15 +2878,15 @@ var InitCategorySimpleWeeklyTransaction = (function (_super) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditSplitTransactionModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_create_split_transaction__ = __webpack_require__(374);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_create_split_transaction__ = __webpack_require__(375);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_big_js__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__add_edit_split_transaction_line__ = __webpack_require__(375);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__add_edit_split_transaction_line__ = __webpack_require__(376);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3045,7 +3060,7 @@ var AddEditSplitTransactionModal = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoggerUINotifierAppender; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app_build_info__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__logger__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__logger_storage_appender__ = __webpack_require__(385);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__logger_storage_appender__ = __webpack_require__(386);
 
 
 
@@ -3315,8 +3330,8 @@ var LoggerUINotifierAppender = (function () {
 var BuildInfo = (function () {
     function BuildInfo() {
     }
-    BuildInfo.version = '0.0.132';
-    BuildInfo.buildDateYYYYMMDD = '2018-01-01';
+    BuildInfo.version = '0.0.135';
+    BuildInfo.buildDateYYYYMMDD = '2018-01-02';
     return BuildInfo;
 }());
 
@@ -3330,7 +3345,7 @@ var BuildInfo = (function () {
 /* unused harmony export BankLinkLocalInfo */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankLinkLocal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db_persistence_provider_manager__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db_persistence_provider_manager__ = __webpack_require__(48);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3491,7 +3506,7 @@ var AddBudgetModal = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_category__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_transactions_init_category_transaction__ = __webpack_require__(370);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_transactions_init_category_transaction__ = __webpack_require__(371);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_core__ = __webpack_require__(0);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3644,9 +3659,9 @@ var ModalProvider = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditTransactionModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_init_simple_transaction__ = __webpack_require__(373);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_init_simple_transaction__ = __webpack_require__(374);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_utils__ = __webpack_require__(15);
@@ -3771,15 +3786,15 @@ var AddEditTransactionModal = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditSplitTransferModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_create_split_transfer__ = __webpack_require__(376);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_create_split_transfer__ = __webpack_require__(377);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_big_js__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__add_edit_split_transfer_line__ = __webpack_require__(377);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__add_edit_split_transfer_line__ = __webpack_require__(378);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3937,10 +3952,10 @@ var AddEditSplitTransferModal = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditTransferModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_init_category_transfer_transaction__ = __webpack_require__(378);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_init_category_transfer_transaction__ = __webpack_require__(379);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_big_js__ = __webpack_require__(16);
@@ -4051,10 +4066,10 @@ var AddEditTransferModal = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pages_budget_budget__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_dev_dev__ = __webpack_require__(144);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__db_persistence_provider_manager__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__db_no_persistence_provider__ = __webpack_require__(365);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__db_persistence_provider_manager__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__db_no_persistence_provider__ = __webpack_require__(366);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__data_transactions_init_budget_transaction__ = __webpack_require__(62);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__db_transaction_serializer__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__db_transaction_serializer__ = __webpack_require__(49);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4324,13 +4339,13 @@ var DemoSetup = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_logger_ui_notifier_appender__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__ionic_native_in_app_browser__ = __webpack_require__(145);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_cronstrue__ = __webpack_require__(505);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_cronstrue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_cronstrue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__demo_demo_ui__ = __webpack_require__(384);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__demo_demo_player__ = __webpack_require__(383);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__demo_demo_ui__ = __webpack_require__(385);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__demo_demo_player__ = __webpack_require__(384);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_utils__ = __webpack_require__(15);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -4420,7 +4435,7 @@ var DevPage = (function () {
         this.notifications.show({ message: "Notification at " + Date.now() });
     };
     DevPage.prototype.generateImportantNotification = function () {
-        this.notifications.show({ message: "Notification at " + Date.now(), important: true, clickAction: { type: 'custom', action: function () { return alert('click!'); } }, category: 'dev.important' });
+        this.notifications.show({ message: "Notification at " + Date.now(), important: true, clickAction: { type: 'custom', data: function () { return alert('click!'); } }, category: 'dev.important' });
     };
     DevPage.prototype.removeImportantNotification = function () {
         this.notifications.remove({ category: 'dev.important' });
@@ -4476,14 +4491,14 @@ var DevPage = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_account__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__bank_bank_provider_registry__ = __webpack_require__(64);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_transactions_create_account_transaction__ = __webpack_require__(379);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_transactions_create_account_transaction__ = __webpack_require__(380);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_big_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_configuration_service__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__data_transactions_set_account_bank_link__ = __webpack_require__(387);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__data_transactions_set_account_bank_link__ = __webpack_require__(388);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__bank_provider_interface__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__data_records_bank_link__ = __webpack_require__(61);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -4641,17 +4656,196 @@ var AddEditAccountModal = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankAccountPage; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_account__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__bank_bank_sync__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_notifications__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_logger__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__bank_standard_host_interface__ = __webpack_require__(66);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__modals_view_bank_transaction_view_bank_transaction__ = __webpack_require__(395);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__bank_link_bank_link__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_configuration_service__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__ = __webpack_require__(389);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var BankAccountPage = (function () {
+    function BankAccountPage(nav, dbms, navParams, engineFactory, modalController, bankSync, notifications, standardHostInterface, configuration, alertController) {
+        this.nav = nav;
+        this.dbms = dbms;
+        this.navParams = navParams;
+        this.engineFactory = engineFactory;
+        this.modalController = modalController;
+        this.bankSync = bankSync;
+        this.notifications = notifications;
+        this.standardHostInterface = standardHostInterface;
+        this.configuration = configuration;
+        this.alertController = alertController;
+        this.transactionViewData = [];
+        this.transactionViewDummyData = [];
+        this.transactionViewArrayData = [];
+        this.transactionViewArrayDataBlank = new __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]();
+        this.logger = __WEBPACK_IMPORTED_MODULE_7__services_logger__["a" /* Logger */].get('BankPage');
+        this.engine = this.engineFactory.getEngineById(navParams.data.budgetId);
+        this.account = this.engine.getRecordById(__WEBPACK_IMPORTED_MODULE_4__data_records_account__["a" /* Account */], navParams.data.accountId);
+        this.bankTransactionTable = this.engine.db.transactionProcessor.table(__WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]);
+        this.transactionView = { data: function () { return this.transactionViewDummyData; } };
+        this.multiSelectEnabled = false;
+        this.selected = {};
+        // TODO: If ! touch enabled then start in multiselect mode?
+    }
+    BankAccountPage.prototype.goBankLink = function () {
+        this.nav.push(__WEBPACK_IMPORTED_MODULE_11__bank_link_bank_link__["a" /* BankLinkPage */], { budgetId: this.engine.db.id, bankLinkId: this.account.bankLinkId });
+    };
+    BankAccountPage.prototype.isSyncing = function () {
+        return false;
+    };
+    BankAccountPage.prototype.refreshData = function () {
+        this.transactionViewData = this.transactionView.data();
+        this.transactionViewDummyData.push(new __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]());
+    };
+    BankAccountPage.prototype.ionViewWillEnter = function () {
+        this.transactionView = this.bankTransactionTable.addDynamicView('accountBankTransactions_' + this.account.id)
+            .applyFind({ 'accountId': this.account.id })
+            .applySortCriteria([['date', true], ['id', false]]);
+        this.transactionViewData = this.transactionView.data();
+        this.logger.debug('WIll Enter Dynamic Views ' + this.bankTransactionTable.DynamicViews.length);
+        /*if (this.transactions.data().length <= this.transactionDisplayLimit) {
+          this.transactionDisplayLimit = 0;
+          this.infiniteScroll.enable(false);
+        }*/
+    };
+    BankAccountPage.prototype.ionViewDidLeave = function () {
+        this.bankTransactionTable.removeDynamicView(this.transactionView.name);
+        this.logger.debug('Did Leave Dynamic Views ' + this.bankTransactionTable.DynamicViews.length);
+        this.transactionView = { data: function () { return this.transactionViewDummyData; } };
+        this.transactionViewData = [];
+    };
+    BankAccountPage.prototype.transactionViewArray = function () {
+        this.transactionViewArrayData.length = 0;
+        (_a = this.transactionViewArrayData).push.apply(_a, this.transactionViewDummyData);
+        (_b = this.transactionViewArrayData).push.apply(_b, this.transactionView.data());
+        return this.transactionViewArrayData;
+        var _a, _b;
+    };
+    BankAccountPage.prototype.unreconciledTransactions = function () {
+        return this.transactionView.data().filter(function (t) { return !t.x.reconciled; });
+    };
+    BankAccountPage.prototype.openTransaction = function (t) {
+        var modal = this.modalController.create(__WEBPACK_IMPORTED_MODULE_10__modals_view_bank_transaction_view_bank_transaction__["a" /* ViewBankTransactionModal */], { budgetId: this.navParams.data.budgetId, bankTransactionId: t.id });
+        modal.present();
+    };
+    BankAccountPage.prototype.transactionListDateHeader = function (record, recordIndex, records) {
+        if (recordIndex === 0 || record.date !== records[recordIndex - 1].date)
+            return record;
+        return null;
+    };
+    BankAccountPage.prototype.toggleMultiSelect = function () {
+        this.multiSelectEnabled = !this.multiSelectEnabled;
+    };
+    BankAccountPage.prototype.selectAll = function () {
+        var _this = this;
+        this.unselectAll();
+        this.unreconciledTransactions().forEach(function (t) { return _this.selected[t.id] = true; });
+    };
+    BankAccountPage.prototype.unselectAll = function () {
+        var _this = this;
+        Object.keys(this.selected).forEach(function (key) { return _this.selected[key] = false; });
+    };
+    BankAccountPage.prototype.allSelected = function () {
+        var _this = this;
+        return this.unreconciledTransactions().every(function (t) { return _this.selected[t.id] === true; });
+    };
+    BankAccountPage.prototype.anySelected = function () {
+        var _this = this;
+        return this.unreconciledTransactions().some(function (t) { return _this.selected[t.id] === true; });
+    };
+    BankAccountPage.prototype.ignoreItem = function (t) {
+        var bti = new __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__["a" /* BankTransactionIgnore */]();
+        bti.bankTransactionId = t.id;
+        this.engine.db.applyTransaction(bti);
+    };
+    BankAccountPage.prototype.unignoreItem = function (t) {
+        var _this = this;
+        this.engine.db.transactionProcessor.findTransactionsForRecord(t, __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__["a" /* BankTransactionIgnore */]).forEach(function (bti) {
+            _this.engine.db.deleteTransaction(bti);
+        });
+    };
+    BankAccountPage.prototype.deleteItem = function (t) {
+        this.alertController.create({
+            message: 'Deleting is not yet implemented',
+            buttons: ['OK']
+        }).present();
+    };
+    BankAccountPage.prototype.deleteSelected = function () {
+        this.alertController.create({
+            message: 'Deleting is not yet implemented',
+            buttons: ['OK']
+        }).present();
+    };
+    BankAccountPage.prototype.ignoreSelected = function () {
+        var _this = this;
+        this.unreconciledTransactions()
+            .filter(function (t) { return _this.selected[t.id] === true && !t.x.reconciled && !t.x.ignored; })
+            .forEach(function (t) { return _this.ignoreItem(t); });
+    };
+    BankAccountPage.prototype.unignoreSelected = function () {
+        var _this = this;
+        this.unreconciledTransactions()
+            .filter(function (t) { return _this.selected[t.id] === true && !t.x.reconciled && t.x.ignored; })
+            .forEach(function (t) { return _this.unignoreItem(t); });
+    };
+    BankAccountPage = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["m" /* Component */])({template:/*ion-inline-start:"c:\working\fb\ebudget\src\pages\bank-account\bank-account.html"*/'<ion-header>\n\n  <ion-navbar>\n\n    <button ion-button menuToggle>\n\n      <main-menu-icon></main-menu-icon>\n\n    </button>\n\n    <ion-title>{{account.name}}</ion-title>\n\n    <ion-buttons end>\n\n        <button ion-button icon-only (click)="toggleMultiSelect()"><ion-icon name="more"></ion-icon></button>\n\n    </ion-buttons>\n\n  </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content class="bank-account-page">\n\n  \n\n  <ion-list class="reconciliation-list" [virtualScroll]="transactionViewArray()" [headerFn]="transactionListDateHeader" approxHeaderHeight="44px" approxItemHeight="65px">\n\n\n\n    <div *virtualHeader="let t1; let i = index;" style="width: 100%">\n\n      <ng-container *ngIf="i === 0">\n\n        <ion-item>Account Number {{account.x.accountNumber}}</ion-item>\n\n        <ion-item>Balance {{account.x.bankBalance}}</ion-item>\n\n        <ion-item>Available Balance {{account.x.bankAvailableBalance}}</ion-item>\n\n        <ion-item>Processed Balance {{account.x.bankProcessedBalance}}</ion-item>\n\n        <ion-item>Calculated Balance {{account.x.calculatedBankBalance}}</ion-item>\n\n        <ion-item>Available Calculated Balance {{account.x.calculatedBankAvailableBalance}}</ion-item>\n\n        <ion-item>Processed Calculated Balance {{account.x.calculatedBankProcessedBalance}}</ion-item>\n\n        <ion-item>Last Updated {{account.x.bankBalanceTimestamp}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankBalance && account.x.calculatedBankBalance">Difference {{account.x.bankBalance.minus(account.x.calculatedBankBalance)}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankAvailableBalance && account.x.calculatedBankAvailableBalance">Available Difference {{account.x.bankAvailableBalance.minus(account.x.calculatedBankAvailableBalance)}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankProcessedBalance && account.x.calculatedBankProcessedBalance">Processed Difference {{account.x.bankProcessedBalance.minus(account.x.calculatedBankProcessedBalance)}}</ion-item>\n\n        <button *ngIf="account.bankLinkId" ion-item (click)="goBankLink()">Go To Bank Link</button>\n\n        <ion-item>TODO If account is syncing</ion-item>\n\n        <ion-item>TODO Sync ONLY this account for the bank link</ion-item>\n\n        <button ion-item detail-none (click)="refreshData()">Refresh/Mod Data</button>      \n\n      </ng-container>\n\n      <ion-item-divider  color="light">{{t1.date | dFormat}}</ion-item-divider>\n\n    </div>\n\n\n\n    <ion-item-sliding *virtualItem="let t" class="transaction-item">\n\n      <button ion-item detail-none (click)="t.x.ignored ? null : openTransaction(t)" [disabled]="(multiSelectEnabled && t.x.reconciled) || (!multiSelectEnabled && t.x.ignored)" [class.transaction-ignored]="t.x.ignored">\n\n        <ion-checkbox [(ngModel)]="selected[t.id]" item-left *ngIf="multiSelectEnabled" [disabled]="t.x.reconciled"></ion-checkbox>\n\n        <div item-left class="reconciliation-marker" [class.unreconciled-marker]="!t.x.reconciled" [class.reconciled-marker]="t.x.reconciled"></div>\n\n        <div item-content class="transaction-content">\n\n          <div class="transaction-description-wrapper">\n\n            <p class="transaction-description">{{t.flagRemoved ? \'Removed (TODO: Change to a warning icon, and need to know what to do with it, delete, ignore, etc?): \' : \'\'}}{{t.description}}</p>\n\n          </div>\n\n          <ion-note *ngIf="t.status !== \'processed\'">{{t.status}}</ion-note>\n\n        </div>\n\n        <currency-display item-right highlightPositive showPositive [value]="t.amount"></currency-display>\n\n      </button>\n\n      <ion-item-options side="left" *ngIf="!t.x.reconciled && !multiSelectEnabled">\n\n        <button ion-button (click)="!t.x.ignored ? ignoreItem(t) : unignoreItem(t)"><ion-icon *ngIf="!t.x.ignored" name="eye-off"></ion-icon><ion-icon *ngIf="t.x.ignored" name="eye"></ion-icon></button>\n\n      </ion-item-options>\n\n  \n\n      <ion-item-options side="right" *ngIf="!t.x.reconciled && !multiSelectEnabled">\n\n        <button ion-button icon-only color="danger" (click)="deleteItem(t)"><ion-icon name="trash"></ion-icon></button>\n\n      </ion-item-options>\n\n    </ion-item-sliding>\n\n  </ion-list>\n\n\n\n</ion-content>\n\n\n\n<ion-footer *ngIf="multiSelectEnabled">\n\n  <ion-toolbar>\n\n    <ion-buttons class="buttons-bar">          \n\n      <button ion-button icon-only (click)="selectAll()" *ngIf="!allSelected()"><ion-icon ios="ios-checkmark-circle" md="md-checkbox"></ion-icon></button>\n\n      <button ion-button icon-only (click)="unselectAll()" *ngIf="allSelected()"><ion-icon ios="ios-checkmark-circle-outline" md="md-checkbox-outline"></ion-icon></button>\n\n      <button ion-button icon-only (click)="deleteSelected()" [disabled]="!anySelected()"><ion-icon name="trash"></ion-icon></button>\n\n      <button ion-button icon-only (click)="ignoreSelected()" [disabled]="!anySelected()"><ion-icon name="eye-off"></ion-icon></button>\n\n      <button ion-button icon-only (click)="unignoreSelected()" [disabled]="!anySelected()"><ion-icon name="eye"></ion-icon></button>\n\n    </ion-buttons>\n\n  </ion-toolbar>\n\n</ion-footer>'/*ion-inline-end:"c:\working\fb\ebudget\src\pages\bank-account\bank-account.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_0_ionic_angular__["j" /* NavController */], __WEBPACK_IMPORTED_MODULE_2__db_dbms__["a" /* Dbms */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["k" /* NavParams */], __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__["a" /* EngineFactory */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["h" /* ModalController */], __WEBPACK_IMPORTED_MODULE_5__bank_bank_sync__["a" /* BankSync */], __WEBPACK_IMPORTED_MODULE_6__services_notifications__["a" /* Notifications */], __WEBPACK_IMPORTED_MODULE_8__bank_standard_host_interface__["a" /* StandardHostInterface */], __WEBPACK_IMPORTED_MODULE_12__services_configuration_service__["a" /* Configuration */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["b" /* AlertController */]])
+    ], BankAccountPage);
+    return BankAccountPage;
+}());
+
+//# sourceMappingURL=bank-account.js.map
+
+/***/ }),
+/* 148 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankLinkPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__bank_bank_sync__ = __webpack_require__(50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__bank_standard_host_interface__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__data_records_bank_link__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(149);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4719,18 +4913,18 @@ var BankLinkPage = (function () {
 //# sourceMappingURL=bank-link.js.map
 
 /***/ }),
-/* 148 */
+/* 149 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditBankLinkModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_records_bank_link__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__data_transactions_create_bank_link__ = __webpack_require__(386);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__data_transactions_create_bank_link__ = __webpack_require__(387);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_secure_prompt__ = __webpack_require__(396);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__bank_provider_interface__ = __webpack_require__(65);
@@ -4858,7 +5052,6 @@ var AddEditBankLinkModal = (function () {
 //# sourceMappingURL=add-edit-bank-link.js.map
 
 /***/ }),
-/* 149 */,
 /* 150 */,
 /* 151 */,
 /* 152 */,
@@ -4868,7 +5061,8 @@ var AddEditBankLinkModal = (function () {
 /* 156 */,
 /* 157 */,
 /* 158 */,
-/* 159 */
+/* 159 */,
+/* 160 */
 /***/ (function(module, exports) {
 
 function webpackEmptyAsyncContext(req) {
@@ -4881,10 +5075,9 @@ function webpackEmptyAsyncContext(req) {
 webpackEmptyAsyncContext.keys = function() { return []; };
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 159;
+webpackEmptyAsyncContext.id = 160;
 
 /***/ }),
-/* 160 */,
 /* 161 */,
 /* 162 */,
 /* 163 */,
@@ -4925,7 +5118,8 @@ webpackEmptyAsyncContext.id = 159;
 /* 198 */,
 /* 199 */,
 /* 200 */,
-/* 201 */
+/* 201 */,
+/* 202 */
 /***/ (function(module, exports) {
 
 function webpackEmptyAsyncContext(req) {
@@ -4938,10 +5132,9 @@ function webpackEmptyAsyncContext(req) {
 webpackEmptyAsyncContext.keys = function() { return []; };
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 201;
+webpackEmptyAsyncContext.id = 202;
 
 /***/ }),
-/* 202 */,
 /* 203 */,
 /* 204 */,
 /* 205 */,
@@ -5104,7 +5297,8 @@ webpackEmptyAsyncContext.id = 201;
 /* 362 */,
 /* 363 */,
 /* 364 */,
-/* 365 */
+/* 365 */,
+/* 366 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5176,8 +5370,8 @@ var NoPersistenceProvider = (function () {
 //# sourceMappingURL=no-persistence-provider.js.map
 
 /***/ }),
-/* 366 */,
-/* 367 */
+/* 367 */,
+/* 368 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5186,13 +5380,13 @@ var NoPersistenceProvider = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_category__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_records_account__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__data_records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__data_records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__data_records_budget__ = __webpack_require__(80);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__modals_add_edit_category_add_edit_category__ = __webpack_require__(138);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__modals_add_edit_category_simple_weekly_add_edit_category_simple_weekly__ = __webpack_require__(371);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__modals_add_edit_category_simple_weekly_add_edit_category_simple_weekly__ = __webpack_require__(372);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__data_transactions_init_category_simple_weekly_transaction__ = __webpack_require__(81);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__services_editor_provider__ = __webpack_require__(139);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__modals_add_edit_transaction_add_edit_transaction__ = __webpack_require__(140);
@@ -5375,13 +5569,13 @@ var CategoryPopover = (function () {
 //# sourceMappingURL=category.js.map
 
 /***/ }),
-/* 368 */
+/* 369 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CurrencyFormatter; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_currency_format__ = __webpack_require__(369);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_currency_format__ = __webpack_require__(370);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -5408,7 +5602,7 @@ var CurrencyFormatter = (function () {
 //# sourceMappingURL=currency-formatter.js.map
 
 /***/ }),
-/* 369 */
+/* 370 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5528,7 +5722,7 @@ var CFormatPipe = (function () {
 //# sourceMappingURL=currency-format.js.map
 
 /***/ }),
-/* 370 */
+/* 371 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5596,14 +5790,14 @@ var InitCategoryTransaction = (function (_super) {
 //# sourceMappingURL=init-category-transaction.js.map
 
 /***/ }),
-/* 371 */
+/* 372 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AddEditCategorySimpleWeeklyModal; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_dbms__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_init_category_simple_weekly_transaction__ = __webpack_require__(81);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_core__ = __webpack_require__(0);
@@ -5674,7 +5868,7 @@ var AddEditCategorySimpleWeeklyModal = (function () {
 //# sourceMappingURL=add-edit-category-simple-weekly.js.map
 
 /***/ }),
-/* 372 */
+/* 373 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5688,13 +5882,13 @@ var Processor = (function () {
 //# sourceMappingURL=processor.js.map
 
 /***/ }),
-/* 373 */
+/* 374 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return InitSimpleTransaction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_big_js__);
 var __extends = (this && this.__extends) || (function () {
@@ -5767,13 +5961,13 @@ var InitSimpleTransaction = (function (_super) {
 //# sourceMappingURL=init-simple-transaction.js.map
 
 /***/ }),
-/* 374 */
+/* 375 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CreateSplitTransaction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_big_js__);
 var __extends = (this && this.__extends) || (function () {
@@ -5859,7 +6053,7 @@ var CreateSplitTransaction = (function (_super) {
 //# sourceMappingURL=create-split-transaction.js.map
 
 /***/ }),
-/* 375 */
+/* 376 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5944,13 +6138,13 @@ var AddEditSplitTransactionLineModal = (function () {
 //# sourceMappingURL=add-edit-split-transaction-line.js.map
 
 /***/ }),
-/* 376 */
+/* 377 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CreateSplitTransfer; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_big_js__);
 var __extends = (this && this.__extends) || (function () {
@@ -6049,7 +6243,7 @@ var CreateSplitTransfer = (function (_super) {
 //# sourceMappingURL=create-split-transfer.js.map
 
 /***/ }),
-/* 377 */
+/* 378 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6130,13 +6324,13 @@ var AddEditSplitTransferLineModal = (function () {
 //# sourceMappingURL=add-edit-split-transfer-line.js.map
 
 /***/ }),
-/* 378 */
+/* 379 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return InitCategoryTransferTransaction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_big_js__);
 var __extends = (this && this.__extends) || (function () {
@@ -6229,7 +6423,7 @@ var InitCategoryTransferTransaction = (function (_super) {
 //# sourceMappingURL=init-category-transfer-transaction.js.map
 
 /***/ }),
-/* 379 */
+/* 380 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6317,13 +6511,13 @@ var CreateAccountTransaction = (function (_super) {
 //# sourceMappingURL=create-account-transaction.js.map
 
 /***/ }),
-/* 380 */
+/* 381 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MergeBankTransactions; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__records_account__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_big_js__ = __webpack_require__(16);
@@ -6458,7 +6652,7 @@ var MergeBankTransactions = (function (_super) {
 //# sourceMappingURL=merge-bank-transactions.js.map
 
 /***/ }),
-/* 381 */
+/* 382 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6467,8 +6661,9 @@ var MergeBankTransactions = (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_big_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__records_transaction_reconciliation__ = __webpack_require__(504);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__records_bank_transaction__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__records_bank_transaction__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_logger__ = __webpack_require__(7);
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -6479,6 +6674,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+
 
 
 
@@ -6503,11 +6699,19 @@ var CreateTransactionReconciliation = (function (_super) {
         t.transactionAmountOverride = this.transactionAmountOverride;
         var transactionTable = tp.table(__WEBPACK_IMPORTED_MODULE_3__records_transaction__["a" /* Transaction */]);
         var transaction = transactionTable.by('id', this.transactionId);
+        if (transaction == null) {
+            __WEBPACK_IMPORTED_MODULE_5__services_logger__["a" /* Logger */].get('create-transaction-reconciliation').info('Trying to reconcile against deleted transaction. Skipping.');
+            return;
+        }
         if (!transaction.x.reconciliationRecords)
             transaction.x.reconciliationRecords = [];
         transaction.x.reconciliationRecords.push(t);
         var bankTransactionTable = tp.table(__WEBPACK_IMPORTED_MODULE_4__records_bank_transaction__["a" /* BankTransaction */]);
         var bankTransaction = bankTransactionTable.by('id', this.bankTransactionId);
+        if (bankTransaction == null) {
+            __WEBPACK_IMPORTED_MODULE_5__services_logger__["a" /* Logger */].get('create-transaction-reconciliation').info('Trying to reconcile against deleted bank transaction. Skipping.');
+            return;
+        }
         if (!bankTransaction.x.reconciliationRecords)
             bankTransaction.x.reconciliationRecords = [];
         bankTransaction.x.reconciliationRecords.push(t);
@@ -6591,15 +6795,15 @@ var CreateTransactionReconciliation = (function (_super) {
 //# sourceMappingURL=create-transaction-reconciliation.js.map
 
 /***/ }),
-/* 382 */
+/* 383 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DemoService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_utils__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__demo_player__ = __webpack_require__(383);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__demo_ui__ = __webpack_require__(384);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__demo_player__ = __webpack_require__(384);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__demo_ui__ = __webpack_require__(385);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__demo_setup__ = __webpack_require__(143);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_autofocus__ = __webpack_require__(78);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -6679,7 +6883,7 @@ var DemoService = (function () {
 //# sourceMappingURL=demo-service.js.map
 
 /***/ }),
-/* 383 */
+/* 384 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6834,7 +7038,7 @@ var DemoPlayer = (function () {
 //# sourceMappingURL=demo-player.js.map
 
 /***/ }),
-/* 384 */
+/* 385 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7032,7 +7236,7 @@ var DemoUI = (function () {
 //# sourceMappingURL=demo-ui.js.map
 
 /***/ }),
-/* 385 */
+/* 386 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7086,7 +7290,7 @@ var LoggerStorageAppender = (function () {
 //# sourceMappingURL=logger-storage-appender.js.map
 
 /***/ }),
-/* 386 */
+/* 387 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7168,7 +7372,7 @@ var CreateBankLink = (function (_super) {
 //# sourceMappingURL=create-bank-link.js.map
 
 /***/ }),
-/* 387 */
+/* 388 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7235,13 +7439,13 @@ var SetAccountBankLink = (function (_super) {
 //# sourceMappingURL=set-account-bank-link.js.map
 
 /***/ }),
-/* 388 */
+/* 389 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankTransactionIgnore; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db_transaction__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__ = __webpack_require__(45);
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -7297,14 +7501,14 @@ var BankTransactionIgnore = (function (_super) {
 //# sourceMappingURL=bank-transaction-ignore.js.map
 
 /***/ }),
-/* 389 */
+/* 390 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BudgetSettingsPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__db_dbms__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_replication_service__ = __webpack_require__(43);
@@ -7314,10 +7518,10 @@ var BankTransactionIgnore = (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__modals_share_budget_share_budget__ = __webpack_require__(79);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__data_transactions_init_budget_transaction__ = __webpack_require__(62);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__angular_http__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_account_account__ = __webpack_require__(390);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_account_account__ = __webpack_require__(391);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__modals_add_edit_account_add_edit_account__ = __webpack_require__(146);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(148);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__bank_link_bank_link__ = __webpack_require__(147);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(149);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__bank_link_bank_link__ = __webpack_require__(148);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7452,7 +7656,7 @@ var BudgetSettingsPage = (function () {
 //# sourceMappingURL=budget-settings.js.map
 
 /***/ }),
-/* 390 */
+/* 391 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7460,14 +7664,14 @@ var BudgetSettingsPage = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_account__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__modals_add_edit_account_add_edit_account__ = __webpack_require__(146);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__bank_bank_sync__ = __webpack_require__(50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__bank_standard_host_interface__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__bank_account_bank_account__ = __webpack_require__(394);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__bank_account_bank_account__ = __webpack_require__(147);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7520,7 +7724,7 @@ var AccountPage = (function () {
 //# sourceMappingURL=account.js.map
 
 /***/ }),
-/* 391 */
+/* 392 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7528,8 +7732,8 @@ var AccountPage = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__provider_interface__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_logger__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_records_bank_transaction__ = __webpack_require__(49);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_merge_bank_transactions__ = __webpack_require__(380);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__data_records_bank_transaction__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_transactions_merge_bank_transactions__ = __webpack_require__(381);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_big_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_utils__ = __webpack_require__(15);
@@ -7678,7 +7882,7 @@ var TransactionSync = (function () {
 //# sourceMappingURL=transaction-sync.js.map
 
 /***/ }),
-/* 392 */
+/* 393 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7686,7 +7890,7 @@ var TransactionSync = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ionic_native_in_app_browser__ = __webpack_require__(145);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__in_app_browser_interface__ = __webpack_require__(507);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_notifications__ = __webpack_require__(19);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7766,7 +7970,7 @@ var InAppBrowserInterfaceFactory = (function () {
 //# sourceMappingURL=in-app-browser-interface-factory.js.map
 
 /***/ }),
-/* 393 */
+/* 394 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7846,177 +8050,6 @@ var BankSyncMonitor = (function () {
 //# sourceMappingURL=bank-sync-monitor.js.map
 
 /***/ }),
-/* 394 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankAccountPage; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_account__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__bank_bank_sync__ = __webpack_require__(50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_notifications__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_logger__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__bank_standard_host_interface__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__ = __webpack_require__(49);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__modals_view_bank_transaction_view_bank_transaction__ = __webpack_require__(395);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__bank_link_bank_link__ = __webpack_require__(147);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_configuration_service__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__ = __webpack_require__(388);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var BankAccountPage = (function () {
-    function BankAccountPage(nav, dbms, navParams, engineFactory, modalController, bankSync, notifications, standardHostInterface, configuration, alertController) {
-        this.nav = nav;
-        this.dbms = dbms;
-        this.navParams = navParams;
-        this.engineFactory = engineFactory;
-        this.modalController = modalController;
-        this.bankSync = bankSync;
-        this.notifications = notifications;
-        this.standardHostInterface = standardHostInterface;
-        this.configuration = configuration;
-        this.alertController = alertController;
-        this.transactionViewData = [];
-        this.transactionViewDummyData = [];
-        this.transactionViewArrayData = [];
-        this.transactionViewArrayDataBlank = new __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]();
-        this.logger = __WEBPACK_IMPORTED_MODULE_7__services_logger__["a" /* Logger */].get('BankPage');
-        this.engine = this.engineFactory.getEngineById(navParams.data.budgetId);
-        this.account = this.engine.getRecordById(__WEBPACK_IMPORTED_MODULE_4__data_records_account__["a" /* Account */], navParams.data.accountId);
-        this.bankTransactionTable = this.engine.db.transactionProcessor.table(__WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]);
-        this.transactionView = { data: function () { return this.transactionViewDummyData; } };
-        this.multiSelectEnabled = false;
-        this.selected = {};
-        // TODO: If ! touch enabled then start in multiselect mode?
-    }
-    BankAccountPage.prototype.goBankLink = function () {
-        this.nav.push(__WEBPACK_IMPORTED_MODULE_11__bank_link_bank_link__["a" /* BankLinkPage */], { budgetId: this.engine.db.id, bankLinkId: this.account.bankLinkId });
-    };
-    BankAccountPage.prototype.isSyncing = function () {
-        return false;
-    };
-    BankAccountPage.prototype.refreshData = function () {
-        this.transactionViewData = this.transactionView.data();
-        this.transactionViewDummyData.push(new __WEBPACK_IMPORTED_MODULE_9__data_records_bank_transaction__["a" /* BankTransaction */]());
-    };
-    BankAccountPage.prototype.ionViewWillEnter = function () {
-        this.transactionView = this.bankTransactionTable.addDynamicView('accountBankTransactions_' + this.account.id)
-            .applyFind({ 'accountId': this.account.id })
-            .applySortCriteria([['date', true], ['id', false]]);
-        this.transactionViewData = this.transactionView.data();
-        this.logger.debug('WIll Enter Dynamic Views ' + this.bankTransactionTable.DynamicViews.length);
-        /*if (this.transactions.data().length <= this.transactionDisplayLimit) {
-          this.transactionDisplayLimit = 0;
-          this.infiniteScroll.enable(false);
-        }*/
-    };
-    BankAccountPage.prototype.ionViewDidLeave = function () {
-        this.bankTransactionTable.removeDynamicView(this.transactionView.name);
-        this.logger.debug('Did Leave Dynamic Views ' + this.bankTransactionTable.DynamicViews.length);
-        this.transactionView = { data: function () { return this.transactionViewDummyData; } };
-        this.transactionViewData = [];
-    };
-    BankAccountPage.prototype.transactionViewArray = function () {
-        this.transactionViewArrayData.length = 0;
-        (_a = this.transactionViewArrayData).push.apply(_a, this.transactionViewDummyData);
-        (_b = this.transactionViewArrayData).push.apply(_b, this.transactionView.data());
-        return this.transactionViewArrayData;
-        var _a, _b;
-    };
-    BankAccountPage.prototype.unreconciledTransactions = function () {
-        return this.transactionView.data().filter(function (t) { return !t.x.reconciled; });
-    };
-    BankAccountPage.prototype.openTransaction = function (t) {
-        var modal = this.modalController.create(__WEBPACK_IMPORTED_MODULE_10__modals_view_bank_transaction_view_bank_transaction__["a" /* ViewBankTransactionModal */], { budgetId: this.navParams.data.budgetId, bankTransactionId: t.id });
-        modal.present();
-    };
-    BankAccountPage.prototype.transactionListDateHeader = function (record, recordIndex, records) {
-        if (recordIndex === 0 || record.date !== records[recordIndex - 1].date)
-            return record;
-        return null;
-    };
-    BankAccountPage.prototype.toggleMultiSelect = function () {
-        this.multiSelectEnabled = !this.multiSelectEnabled;
-    };
-    BankAccountPage.prototype.selectAll = function () {
-        var _this = this;
-        this.unselectAll();
-        this.unreconciledTransactions().forEach(function (t) { return _this.selected[t.id] = true; });
-    };
-    BankAccountPage.prototype.unselectAll = function () {
-        var _this = this;
-        Object.keys(this.selected).forEach(function (key) { return _this.selected[key] = false; });
-    };
-    BankAccountPage.prototype.allSelected = function () {
-        var _this = this;
-        return this.unreconciledTransactions().every(function (t) { return _this.selected[t.id] === true; });
-    };
-    BankAccountPage.prototype.anySelected = function () {
-        var _this = this;
-        return this.unreconciledTransactions().some(function (t) { return _this.selected[t.id] === true; });
-    };
-    BankAccountPage.prototype.ignoreItem = function (t) {
-        var bti = new __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__["a" /* BankTransactionIgnore */]();
-        bti.bankTransactionId = t.id;
-        this.engine.db.applyTransaction(bti);
-    };
-    BankAccountPage.prototype.unignoreItem = function (t) {
-        var _this = this;
-        this.engine.db.transactionProcessor.findTransactionsForRecord(t, __WEBPACK_IMPORTED_MODULE_13__data_transactions_bank_transaction_ignore__["a" /* BankTransactionIgnore */]).forEach(function (bti) {
-            _this.engine.db.deleteTransaction(bti);
-        });
-    };
-    BankAccountPage.prototype.deleteItem = function (t) {
-        this.alertController.create({
-            message: 'Deleting is not yet implemented',
-            buttons: ['OK']
-        }).present();
-    };
-    BankAccountPage.prototype.deleteSelected = function () {
-        this.alertController.create({
-            message: 'Deleting is not yet implemented',
-            buttons: ['OK']
-        }).present();
-    };
-    BankAccountPage.prototype.ignoreSelected = function () {
-    };
-    BankAccountPage.prototype.unignoreSelected = function () {
-    };
-    BankAccountPage = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["m" /* Component */])({template:/*ion-inline-start:"c:\working\fb\ebudget\src\pages\bank-account\bank-account.html"*/'<ion-header>\n\n  <ion-navbar>\n\n    <button ion-button menuToggle>\n\n      <main-menu-icon></main-menu-icon>\n\n    </button>\n\n    <ion-title>{{account.name}}</ion-title>\n\n    <ion-buttons end>\n\n        <button ion-button icon-only (click)="toggleMultiSelect()"><ion-icon name="more"></ion-icon></button>\n\n    </ion-buttons>\n\n  </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content class="bank-account-page">\n\n  \n\n  <ion-list class="reconciliation-list" [virtualScroll]="transactionViewArray()" [headerFn]="transactionListDateHeader" approxHeaderHeight="44px" approxItemHeight="65px">\n\n\n\n    <div *virtualHeader="let t1; let i = index;" style="width: 100%">\n\n      <ng-container *ngIf="i === 0">\n\n        <ion-item>Account Number {{account.x.accountNumber}}</ion-item>\n\n        <ion-item>Balance {{account.x.bankBalance}}</ion-item>\n\n        <ion-item>Available Balance {{account.x.bankAvailableBalance}}</ion-item>\n\n        <ion-item>Processed Balance {{account.x.bankProcessedBalance}}</ion-item>\n\n        <ion-item>Calculated Balance {{account.x.calculatedBankBalance}}</ion-item>\n\n        <ion-item>Available Calculated Balance {{account.x.calculatedBankAvailableBalance}}</ion-item>\n\n        <ion-item>Processed Calculated Balance {{account.x.calculatedBankProcessedBalance}}</ion-item>\n\n        <ion-item>Last Updated {{account.x.bankBalanceTimestamp}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankBalance && account.x.calculatedBankBalance">Difference {{account.x.bankBalance.minus(account.x.calculatedBankBalance)}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankAvailableBalance && account.x.calculatedBankAvailableBalance">Available Difference {{account.x.bankAvailableBalance.minus(account.x.calculatedBankAvailableBalance)}}</ion-item>\n\n        <ion-item *ngIf="account.x.bankProcessedBalance && account.x.calculatedBankProcessedBalance">Processed Difference {{account.x.bankProcessedBalance.minus(account.x.calculatedBankProcessedBalance)}}</ion-item>\n\n        <button *ngIf="account.bankLinkId" ion-item (click)="goBankLink()">Go To Bank Link</button>\n\n        <ion-item>TODO If account is syncing</ion-item>\n\n        <ion-item>TODO Sync ONLY this account for the bank link</ion-item>\n\n        <button ion-item detail-none (click)="refreshData()">Refresh/Mod Data</button>      \n\n      </ng-container>\n\n      <ion-item-divider  color="light">{{t1.date | dFormat}}</ion-item-divider>\n\n    </div>\n\n\n\n    <ion-item-sliding *virtualItem="let t" (ionSwipe)="!t.x.ignored ? ignoreItem(t) : unignoreItem(t)" class="transaction-item">\n\n      <button ion-item detail-none (click)="openTransaction(t)" [class.transaction-ignored]="t.x.ignored">\n\n        <ion-checkbox [(ngModel)]="selected[t.id]" item-left *ngIf="multiSelectEnabled"></ion-checkbox>\n\n        <div item-left class="reconciliation-marker" [class.unreconciled-marker]="!t.x.reconciled" [class.reconciled-marker]="t.x.reconciled"></div>\n\n        <div item-content class="transaction-content">\n\n          <div class="transaction-description-wrapper">\n\n            <p class="transaction-description">{{t.flagRemoved ? \'Removed (TODO: Change to a warning icon, and need to know what to do with it, delete, ignore, etc?): \' : \'\'}}{{t.description}}</p>\n\n          </div>\n\n          <ion-note *ngIf="t.status !== \'processed\'">{{t.status}}</ion-note>\n\n        </div>\n\n        <currency-display item-right highlightPositive showPositive [value]="t.amount"></currency-display>\n\n      </button>\n\n      <ion-item-options side="left" *ngIf="!t.x.reconciled && !multiSelectEnabled">\n\n        <button ion-button expandable (click)="!t.x.ignored ? ignoreItem(t) : unignoreItem(t)"><ion-icon *ngIf="!t.x.ignored" name="eye-off"></ion-icon><ion-icon *ngIf="t.x.ignored" name="eye"></ion-icon></button>\n\n      </ion-item-options>\n\n  \n\n      <ion-item-options side="right" *ngIf="!t.x.reconciled && !multiSelectEnabled">\n\n        <button ion-button icon-only color="danger" (click)="deleteItem(t)"><ion-icon name="trash"></ion-icon></button>\n\n      </ion-item-options>\n\n    </ion-item-sliding>\n\n  </ion-list>\n\n\n\n</ion-content>\n\n\n\n<ion-footer *ngIf="multiSelectEnabled">\n\n  <ion-toolbar>\n\n    <ion-buttons class="buttons-bar">          \n\n      <button ion-button icon-only (click)="selectAll()" *ngIf="!allSelected()"><ion-icon ios="ios-checkmark-circle" md="md-checkmark"></ion-icon></button>\n\n      <button ion-button icon-only (click)="unselectAll()" *ngIf="allSelected()"><ion-icon ios="ios-checkmark-circle-outline" md="md-checkmark-outline"></ion-icon></button>\n\n      <button ion-button icon-only (click)="deleteSelected()" [disabled]="!anySelected()"><ion-icon name="trash"></ion-icon></button>\n\n      <button ion-button icon-only (click)="ignoreSelected()" [disabled]="!anySelected()"><ion-icon name="eye-off"></ion-icon></button>\n\n      <button ion-button icon-only (click)="unignoreSelected()" [disabled]="!anySelected()"><ion-icon name="eye"></ion-icon></button>\n\n    </ion-buttons>\n\n  </ion-toolbar>\n\n</ion-footer>'/*ion-inline-end:"c:\working\fb\ebudget\src\pages\bank-account\bank-account.html"*/
-        }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_0_ionic_angular__["j" /* NavController */], __WEBPACK_IMPORTED_MODULE_2__db_dbms__["a" /* Dbms */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["k" /* NavParams */], __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__["a" /* EngineFactory */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["h" /* ModalController */], __WEBPACK_IMPORTED_MODULE_5__bank_bank_sync__["a" /* BankSync */], __WEBPACK_IMPORTED_MODULE_6__services_notifications__["a" /* Notifications */], __WEBPACK_IMPORTED_MODULE_8__bank_standard_host_interface__["a" /* StandardHostInterface */], __WEBPACK_IMPORTED_MODULE_12__services_configuration_service__["a" /* Configuration */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["b" /* AlertController */]])
-    ], BankAccountPage);
-    return BankAccountPage;
-}());
-
-//# sourceMappingURL=bank-account.js.map
-
-/***/ }),
 /* 395 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -8026,12 +8059,12 @@ var BankAccountPage = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db_dbms__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_bank_transaction__ = __webpack_require__(49);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_records_transaction__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_bank_transaction__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_records_transaction__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_big_js__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__data_transactions_create_transaction_reconciliation__ = __webpack_require__(381);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__data_transactions_create_transaction_reconciliation__ = __webpack_require__(382);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__add_edit_split_transaction_add_edit_split_transaction__ = __webpack_require__(82);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -8417,7 +8450,7 @@ var AboutPage = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UpdateCheck; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__app_app_ready__ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_build_info__ = __webpack_require__(84);
@@ -8618,7 +8651,7 @@ var SettingsPage = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NotificationsPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(19);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8661,7 +8694,7 @@ var NotificationsPage = (function () {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BankSyncUtils; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bank_sync_monitor__ = __webpack_require__(393);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__bank_sync_monitor__ = __webpack_require__(394);
 
 var BankSyncUtils = (function () {
     function BankSyncUtils() {
@@ -8724,7 +8757,7 @@ var BankSyncUtils = (function () {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(403);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(425);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_logger_storage_appender__ = __webpack_require__(385);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_logger_storage_appender__ = __webpack_require__(386);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_logger_ui_notifier_appender__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_logger__ = __webpack_require__(7);
 
@@ -8784,70 +8817,71 @@ Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* pl
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_ready__ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_exception_handler__ = __webpack_require__(506);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_home_home__ = __webpack_require__(77);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_budget_settings_budget_settings__ = __webpack_require__(389);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_account_account__ = __webpack_require__(390);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_bank_account_bank_account__ = __webpack_require__(394);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_budget_settings_budget_settings__ = __webpack_require__(390);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_account_account__ = __webpack_require__(391);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_bank_account_bank_account__ = __webpack_require__(147);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__pages_budget_budget__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_about_about__ = __webpack_require__(397);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_category_category__ = __webpack_require__(367);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_category_category__ = __webpack_require__(368);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__pages_settings_settings__ = __webpack_require__(399);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__pages_dev_dev__ = __webpack_require__(144);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__pages_notifications_notifications__ = __webpack_require__(400);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__modals_share_budget_share_budget__ = __webpack_require__(79);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__modals_add_budget_add_budget__ = __webpack_require__(136);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__modals_add_edit_category_add_edit_category__ = __webpack_require__(138);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__modals_add_edit_category_simple_weekly_add_edit_category_simple_weekly__ = __webpack_require__(371);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__modals_add_edit_category_simple_weekly_add_edit_category_simple_weekly__ = __webpack_require__(372);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__modals_add_edit_transaction_add_edit_transaction__ = __webpack_require__(140);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__modals_add_edit_split_transaction_add_edit_split_transaction__ = __webpack_require__(82);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__modals_add_edit_split_transaction_add_edit_split_transaction_line__ = __webpack_require__(375);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__modals_add_edit_split_transaction_add_edit_split_transaction_line__ = __webpack_require__(376);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__modals_add_edit_split_transfer_add_edit_split_transfer__ = __webpack_require__(141);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__modals_add_edit_split_transfer_add_edit_split_transfer_line__ = __webpack_require__(377);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__modals_add_edit_split_transfer_add_edit_split_transfer_line__ = __webpack_require__(378);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__modals_add_edit_transfer_add_edit_transfer__ = __webpack_require__(142);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__modals_add_edit_account_add_edit_account__ = __webpack_require__(146);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__components_main_menu_content_main_menu_content__ = __webpack_require__(513);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__components_notification_list_notification_list__ = __webpack_require__(514);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__components_main_menu_icon_main_menu_icon__ = __webpack_require__(515);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__db_persistence_provider_manager__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__db_persistence_provider_manager__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__services_editor_provider__ = __webpack_require__(139);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__bank_bank_provider_registry__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__bank_standard_host_interface__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__bank_transaction_sync__ = __webpack_require__(391);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__bank_transaction_sync__ = __webpack_require__(392);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__bank_bank_sync__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__services_replication_service__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__services_updated_check__ = __webpack_require__(516);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__services_update_check__ = __webpack_require__(398);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__services_currency_formatter__ = __webpack_require__(368);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__services_notifications__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__db_transaction_serializer__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__services_currency_formatter__ = __webpack_require__(369);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__services_notifications__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__db_transaction_serializer__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__components_currency_field__ = __webpack_require__(517);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__components_no_focus__ = __webpack_require__(518);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__components_error_label__ = __webpack_require__(519);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__components_replication_error_display__ = __webpack_require__(520);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__components_currency_display__ = __webpack_require__(521);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_51__components_date_format__ = __webpack_require__(523);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__components_currency_format__ = __webpack_require__(369);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__components_currency_format__ = __webpack_require__(370);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_53__components_cute_progress_bar__ = __webpack_require__(524);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_54__ionic_native_splash_screen__ = __webpack_require__(241);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__ionic_native_status_bar__ = __webpack_require__(243);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_56__ionic_native_sqlite__ = __webpack_require__(245);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_54__ionic_native_splash_screen__ = __webpack_require__(242);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__ionic_native_status_bar__ = __webpack_require__(244);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_56__ionic_native_sqlite__ = __webpack_require__(246);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_57__ionic_native_device__ = __webpack_require__(137);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_58__ionic_native_in_app_browser__ = __webpack_require__(145);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__ionic_native_clipboard__ = __webpack_require__(244);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__ionic_native_clipboard__ = __webpack_require__(245);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__modals_view_bank_transaction_view_bank_transaction__ = __webpack_require__(395);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__ionic_native_secure_storage__ = __webpack_require__(366);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__demo_demo_service__ = __webpack_require__(382);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__ionic_native_secure_storage__ = __webpack_require__(367);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__demo_demo_service__ = __webpack_require__(383);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_63__demo_demo_setup__ = __webpack_require__(143);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_64__services_autofocus__ = __webpack_require__(78);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_65__pages_bank_link_bank_link__ = __webpack_require__(147);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_66__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_65__pages_bank_link_bank_link__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_66__modals_add_edit_bank_link_add_edit_bank_link__ = __webpack_require__(149);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_67__services_secure_prompt__ = __webpack_require__(396);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_68__bank_in_app_browser_interface_factory__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_68__bank_in_app_browser_interface_factory__ = __webpack_require__(393);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_69__bank_bank_link_local__ = __webpack_require__(85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_70__bank_bank_auto_sync__ = __webpack_require__(525);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_71__components_status_status__ = __webpack_require__(526);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_72__services_reconciliation_status__ = __webpack_require__(527);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8857,6 +8891,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+
 
 
 
@@ -8930,7 +8965,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var AppModule = (function () {
-    function AppModule(updatedCheck, updateCheck, bankAutoSync) {
+    function AppModule(updatedCheck, updateCheck, bankAutoSync, reconciliationStatus) {
     }
     AppModule = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["I" /* NgModule */])({
@@ -8972,7 +9007,7 @@ var AppModule = (function () {
                 __WEBPACK_IMPORTED_MODULE_30__components_main_menu_icon_main_menu_icon__["a" /* MainMenuIcon */],
                 __WEBPACK_IMPORTED_MODULE_29__components_notification_list_notification_list__["a" /* NotificationList */],
                 __WEBPACK_IMPORTED_MODULE_65__pages_bank_link_bank_link__["a" /* BankLinkPage */],
-                __WEBPACK_IMPORTED_MODULE_66__modals_add_edit_bank_link_add_edit_bank_link__["a" /* AddEditBankLinkModal */],
+                __WEBPACK_IMPORTED_MODULE_66__modals_add_edit_bank_link_add_edit_bank_link__["a" /* AddEditBankLinkModal */]
             ],
             imports: [
                 __WEBPACK_IMPORTED_MODULE_1__angular_platform_browser__["a" /* BrowserModule */],
@@ -9041,10 +9076,11 @@ var AppModule = (function () {
                 __WEBPACK_IMPORTED_MODULE_39__services_replication_service__["a" /* Replication */],
                 __WEBPACK_IMPORTED_MODULE_62__demo_demo_service__["a" /* DemoService */],
                 __WEBPACK_IMPORTED_MODULE_63__demo_demo_setup__["a" /* DemoSetup */],
-                __WEBPACK_IMPORTED_MODULE_64__services_autofocus__["a" /* Autofocus */]
+                __WEBPACK_IMPORTED_MODULE_64__services_autofocus__["a" /* Autofocus */],
+                __WEBPACK_IMPORTED_MODULE_72__services_reconciliation_status__["a" /* ReconciliationStatus */]
             ]
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_40__services_updated_check__["a" /* UpdatedCheck */], __WEBPACK_IMPORTED_MODULE_41__services_update_check__["a" /* UpdateCheck */], __WEBPACK_IMPORTED_MODULE_70__bank_bank_auto_sync__["a" /* BankAutoSync */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_40__services_updated_check__["a" /* UpdatedCheck */], __WEBPACK_IMPORTED_MODULE_41__services_update_check__["a" /* UpdateCheck */], __WEBPACK_IMPORTED_MODULE_70__bank_bank_auto_sync__["a" /* BankAutoSync */], __WEBPACK_IMPORTED_MODULE_72__services_reconciliation_status__["a" /* ReconciliationStatus */]])
     ], AppModule);
     return AppModule;
 }());
@@ -9100,42 +9136,42 @@ var AppModule = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return App; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_splash_screen__ = __webpack_require__(241);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_status_bar__ = __webpack_require__(243);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_splash_screen__ = __webpack_require__(242);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_status_bar__ = __webpack_require__(244);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_home_home__ = __webpack_require__(77);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pages_budget_budget__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__db_persistence_provider_manager__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__db_persistence_provider_manager__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_editor_provider__ = __webpack_require__(139);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__services_replication_service__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__db_transaction_serializer__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__db_transaction_serializer__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__app_ready__ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__bank_bank_provider_registry__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__data_transactions_init_budget_transaction__ = __webpack_require__(62);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__data_transactions_init_category_transaction__ = __webpack_require__(370);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__data_transactions_init_simple_transaction__ = __webpack_require__(373);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__data_transactions_create_split_transaction__ = __webpack_require__(374);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__data_transactions_create_split_transfer__ = __webpack_require__(376);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__data_transactions_init_category_transfer_transaction__ = __webpack_require__(378);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__data_transactions_init_category_transaction__ = __webpack_require__(371);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__data_transactions_init_simple_transaction__ = __webpack_require__(374);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__data_transactions_create_split_transaction__ = __webpack_require__(375);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__data_transactions_create_split_transfer__ = __webpack_require__(377);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__data_transactions_init_category_transfer_transaction__ = __webpack_require__(379);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__data_transactions_init_category_simple_weekly_transaction__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__data_transactions_create_account_transaction__ = __webpack_require__(379);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__data_transactions_merge_bank_transactions__ = __webpack_require__(380);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__data_transactions_create_account_transaction__ = __webpack_require__(380);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__data_transactions_merge_bank_transactions__ = __webpack_require__(381);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__modals_add_edit_transfer_add_edit_transfer__ = __webpack_require__(142);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__modals_add_edit_transaction_add_edit_transaction__ = __webpack_require__(140);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__modals_add_edit_split_transaction_add_edit_split_transaction__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__modals_add_edit_split_transfer_add_edit_split_transfer__ = __webpack_require__(141);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__bank_providers_anz_mobile_web_1__ = __webpack_require__(502);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__bank_providers_mock_data_provider__ = __webpack_require__(503);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__data_transactions_create_transaction_reconciliation__ = __webpack_require__(381);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__data_transactions_create_transaction_reconciliation__ = __webpack_require__(382);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__services_utils__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__demo_demo_service__ = __webpack_require__(382);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__demo_demo_service__ = __webpack_require__(383);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__services_autofocus__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__demo_demo_setup__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__data_transactions_create_bank_link__ = __webpack_require__(386);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__data_transactions_set_account_bank_link__ = __webpack_require__(387);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__data_transactions_bank_transaction_ignore__ = __webpack_require__(388);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__data_transactions_create_bank_link__ = __webpack_require__(387);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__data_transactions_set_account_bank_link__ = __webpack_require__(388);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__data_transactions_bank_transaction_ignore__ = __webpack_require__(389);
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -9333,11 +9369,15 @@ var TransactionModalProvider = (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__transaction_processor__ = __webpack_require__(478);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_logger__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_chunked_task__ = __webpack_require__(479);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__);
+
 
 
 
 var Db = (function () {
     function Db(id, dbms, persistenceProvider, loki, transactionSerializer) {
+        var _this = this;
         this.id = id;
         this.dbms = dbms;
         this.persistenceProvider = persistenceProvider;
@@ -9350,6 +9390,8 @@ var Db = (function () {
         this.transactions = this.loki.addCollection('transactions_' + this.id);
         this.transactions.ensureUniqueIndex('id');
         this.eventListeners = [];
+        this.dbEventsObservable = new __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__["Observable"](function (observer) { return _this.dbEventsObserver = observer; }).share();
+        this.dbTransactionEventsObservable = new __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__["Observable"](function (observer) { return _this.dbTransactionEventsObserver = observer; }).share();
     }
     Db.prototype.toJSON = function () {
         return this.id;
@@ -9561,6 +9603,11 @@ var Db = (function () {
     Db.prototype.addEventListener = function (listener) {
         this.eventListeners.push(listener);
     };
+    Db.prototype.on = function (event) {
+        if (event === 'db-activated' || event === 'db-deleted')
+            return this.dbEventsObservable.filter(function (dbEvent) { return dbEvent.eventName === event; });
+        return this.dbTransactionEventsObservable.filter(function (dbEvent) { return dbEvent.eventName === event; });
+    };
     Db.prototype.deleteInternal = function () {
         this.fireEvent({ eventName: 'db-deleted' });
         this.eventListeners.length = 0;
@@ -9570,6 +9617,10 @@ var Db = (function () {
             dbEvent.db = this;
         this.logger.debug(function () { return dbEvent; });
         this.eventListeners.forEach(function (listener) { listener(dbEvent); });
+        if (this.dbEventsObserver && dbEvent.eventName === 'db-activated' || dbEvent.eventName === 'db-deleted')
+            this.dbEventsObserver.next(dbEvent);
+        else if (this.dbTransactionEventsObserver)
+            this.dbTransactionEventsObserver.next(dbEvent);
     };
     return Db;
 }());
@@ -9989,244 +10040,244 @@ var SqlStoragePersistenceProvider = (function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./af": 246,
-	"./af.js": 246,
-	"./ar": 247,
-	"./ar-dz": 248,
-	"./ar-dz.js": 248,
-	"./ar-kw": 249,
-	"./ar-kw.js": 249,
-	"./ar-ly": 250,
-	"./ar-ly.js": 250,
-	"./ar-ma": 251,
-	"./ar-ma.js": 251,
-	"./ar-sa": 252,
-	"./ar-sa.js": 252,
-	"./ar-tn": 253,
-	"./ar-tn.js": 253,
-	"./ar.js": 247,
-	"./az": 254,
-	"./az.js": 254,
-	"./be": 255,
-	"./be.js": 255,
-	"./bg": 256,
-	"./bg.js": 256,
-	"./bm": 257,
-	"./bm.js": 257,
-	"./bn": 258,
-	"./bn.js": 258,
-	"./bo": 259,
-	"./bo.js": 259,
-	"./br": 260,
-	"./br.js": 260,
-	"./bs": 261,
-	"./bs.js": 261,
-	"./ca": 262,
-	"./ca.js": 262,
-	"./cs": 263,
-	"./cs.js": 263,
-	"./cv": 264,
-	"./cv.js": 264,
-	"./cy": 265,
-	"./cy.js": 265,
-	"./da": 266,
-	"./da.js": 266,
-	"./de": 267,
-	"./de-at": 268,
-	"./de-at.js": 268,
-	"./de-ch": 269,
-	"./de-ch.js": 269,
-	"./de.js": 267,
-	"./dv": 270,
-	"./dv.js": 270,
-	"./el": 271,
-	"./el.js": 271,
-	"./en-au": 272,
-	"./en-au.js": 272,
-	"./en-ca": 273,
-	"./en-ca.js": 273,
-	"./en-gb": 274,
-	"./en-gb.js": 274,
-	"./en-ie": 275,
-	"./en-ie.js": 275,
-	"./en-nz": 276,
-	"./en-nz.js": 276,
-	"./eo": 277,
-	"./eo.js": 277,
-	"./es": 278,
-	"./es-do": 279,
-	"./es-do.js": 279,
-	"./es-us": 280,
-	"./es-us.js": 280,
-	"./es.js": 278,
-	"./et": 281,
-	"./et.js": 281,
-	"./eu": 282,
-	"./eu.js": 282,
-	"./fa": 283,
-	"./fa.js": 283,
-	"./fi": 284,
-	"./fi.js": 284,
-	"./fo": 285,
-	"./fo.js": 285,
-	"./fr": 286,
-	"./fr-ca": 287,
-	"./fr-ca.js": 287,
-	"./fr-ch": 288,
-	"./fr-ch.js": 288,
-	"./fr.js": 286,
-	"./fy": 289,
-	"./fy.js": 289,
-	"./gd": 290,
-	"./gd.js": 290,
-	"./gl": 291,
-	"./gl.js": 291,
-	"./gom-latn": 292,
-	"./gom-latn.js": 292,
-	"./gu": 293,
-	"./gu.js": 293,
-	"./he": 294,
-	"./he.js": 294,
-	"./hi": 295,
-	"./hi.js": 295,
-	"./hr": 296,
-	"./hr.js": 296,
-	"./hu": 297,
-	"./hu.js": 297,
-	"./hy-am": 298,
-	"./hy-am.js": 298,
-	"./id": 299,
-	"./id.js": 299,
-	"./is": 300,
-	"./is.js": 300,
-	"./it": 301,
-	"./it.js": 301,
-	"./ja": 302,
-	"./ja.js": 302,
-	"./jv": 303,
-	"./jv.js": 303,
-	"./ka": 304,
-	"./ka.js": 304,
-	"./kk": 305,
-	"./kk.js": 305,
-	"./km": 306,
-	"./km.js": 306,
-	"./kn": 307,
-	"./kn.js": 307,
-	"./ko": 308,
-	"./ko.js": 308,
-	"./ky": 309,
-	"./ky.js": 309,
-	"./lb": 310,
-	"./lb.js": 310,
-	"./lo": 311,
-	"./lo.js": 311,
-	"./lt": 312,
-	"./lt.js": 312,
-	"./lv": 313,
-	"./lv.js": 313,
-	"./me": 314,
-	"./me.js": 314,
-	"./mi": 315,
-	"./mi.js": 315,
-	"./mk": 316,
-	"./mk.js": 316,
-	"./ml": 317,
-	"./ml.js": 317,
-	"./mr": 318,
-	"./mr.js": 318,
-	"./ms": 319,
-	"./ms-my": 320,
-	"./ms-my.js": 320,
-	"./ms.js": 319,
-	"./mt": 321,
-	"./mt.js": 321,
-	"./my": 322,
-	"./my.js": 322,
-	"./nb": 323,
-	"./nb.js": 323,
-	"./ne": 324,
-	"./ne.js": 324,
-	"./nl": 325,
-	"./nl-be": 326,
-	"./nl-be.js": 326,
-	"./nl.js": 325,
-	"./nn": 327,
-	"./nn.js": 327,
-	"./pa-in": 328,
-	"./pa-in.js": 328,
-	"./pl": 329,
-	"./pl.js": 329,
-	"./pt": 330,
-	"./pt-br": 331,
-	"./pt-br.js": 331,
-	"./pt.js": 330,
-	"./ro": 332,
-	"./ro.js": 332,
-	"./ru": 333,
-	"./ru.js": 333,
-	"./sd": 334,
-	"./sd.js": 334,
-	"./se": 335,
-	"./se.js": 335,
-	"./si": 336,
-	"./si.js": 336,
-	"./sk": 337,
-	"./sk.js": 337,
-	"./sl": 338,
-	"./sl.js": 338,
-	"./sq": 339,
-	"./sq.js": 339,
-	"./sr": 340,
-	"./sr-cyrl": 341,
-	"./sr-cyrl.js": 341,
-	"./sr.js": 340,
-	"./ss": 342,
-	"./ss.js": 342,
-	"./sv": 343,
-	"./sv.js": 343,
-	"./sw": 344,
-	"./sw.js": 344,
-	"./ta": 345,
-	"./ta.js": 345,
-	"./te": 346,
-	"./te.js": 346,
-	"./tet": 347,
-	"./tet.js": 347,
-	"./th": 348,
-	"./th.js": 348,
-	"./tl-ph": 349,
-	"./tl-ph.js": 349,
-	"./tlh": 350,
-	"./tlh.js": 350,
-	"./tr": 351,
-	"./tr.js": 351,
-	"./tzl": 352,
-	"./tzl.js": 352,
-	"./tzm": 353,
-	"./tzm-latn": 354,
-	"./tzm-latn.js": 354,
-	"./tzm.js": 353,
-	"./uk": 355,
-	"./uk.js": 355,
-	"./ur": 356,
-	"./ur.js": 356,
-	"./uz": 357,
-	"./uz-latn": 358,
-	"./uz-latn.js": 358,
-	"./uz.js": 357,
-	"./vi": 359,
-	"./vi.js": 359,
-	"./x-pseudo": 360,
-	"./x-pseudo.js": 360,
-	"./yo": 361,
-	"./yo.js": 361,
-	"./zh-cn": 362,
-	"./zh-cn.js": 362,
-	"./zh-hk": 363,
-	"./zh-hk.js": 363,
-	"./zh-tw": 364,
-	"./zh-tw.js": 364
+	"./af": 247,
+	"./af.js": 247,
+	"./ar": 248,
+	"./ar-dz": 249,
+	"./ar-dz.js": 249,
+	"./ar-kw": 250,
+	"./ar-kw.js": 250,
+	"./ar-ly": 251,
+	"./ar-ly.js": 251,
+	"./ar-ma": 252,
+	"./ar-ma.js": 252,
+	"./ar-sa": 253,
+	"./ar-sa.js": 253,
+	"./ar-tn": 254,
+	"./ar-tn.js": 254,
+	"./ar.js": 248,
+	"./az": 255,
+	"./az.js": 255,
+	"./be": 256,
+	"./be.js": 256,
+	"./bg": 257,
+	"./bg.js": 257,
+	"./bm": 258,
+	"./bm.js": 258,
+	"./bn": 259,
+	"./bn.js": 259,
+	"./bo": 260,
+	"./bo.js": 260,
+	"./br": 261,
+	"./br.js": 261,
+	"./bs": 262,
+	"./bs.js": 262,
+	"./ca": 263,
+	"./ca.js": 263,
+	"./cs": 264,
+	"./cs.js": 264,
+	"./cv": 265,
+	"./cv.js": 265,
+	"./cy": 266,
+	"./cy.js": 266,
+	"./da": 267,
+	"./da.js": 267,
+	"./de": 268,
+	"./de-at": 269,
+	"./de-at.js": 269,
+	"./de-ch": 270,
+	"./de-ch.js": 270,
+	"./de.js": 268,
+	"./dv": 271,
+	"./dv.js": 271,
+	"./el": 272,
+	"./el.js": 272,
+	"./en-au": 273,
+	"./en-au.js": 273,
+	"./en-ca": 274,
+	"./en-ca.js": 274,
+	"./en-gb": 275,
+	"./en-gb.js": 275,
+	"./en-ie": 276,
+	"./en-ie.js": 276,
+	"./en-nz": 277,
+	"./en-nz.js": 277,
+	"./eo": 278,
+	"./eo.js": 278,
+	"./es": 279,
+	"./es-do": 280,
+	"./es-do.js": 280,
+	"./es-us": 281,
+	"./es-us.js": 281,
+	"./es.js": 279,
+	"./et": 282,
+	"./et.js": 282,
+	"./eu": 283,
+	"./eu.js": 283,
+	"./fa": 284,
+	"./fa.js": 284,
+	"./fi": 285,
+	"./fi.js": 285,
+	"./fo": 286,
+	"./fo.js": 286,
+	"./fr": 287,
+	"./fr-ca": 288,
+	"./fr-ca.js": 288,
+	"./fr-ch": 289,
+	"./fr-ch.js": 289,
+	"./fr.js": 287,
+	"./fy": 290,
+	"./fy.js": 290,
+	"./gd": 291,
+	"./gd.js": 291,
+	"./gl": 292,
+	"./gl.js": 292,
+	"./gom-latn": 293,
+	"./gom-latn.js": 293,
+	"./gu": 294,
+	"./gu.js": 294,
+	"./he": 295,
+	"./he.js": 295,
+	"./hi": 296,
+	"./hi.js": 296,
+	"./hr": 297,
+	"./hr.js": 297,
+	"./hu": 298,
+	"./hu.js": 298,
+	"./hy-am": 299,
+	"./hy-am.js": 299,
+	"./id": 300,
+	"./id.js": 300,
+	"./is": 301,
+	"./is.js": 301,
+	"./it": 302,
+	"./it.js": 302,
+	"./ja": 303,
+	"./ja.js": 303,
+	"./jv": 304,
+	"./jv.js": 304,
+	"./ka": 305,
+	"./ka.js": 305,
+	"./kk": 306,
+	"./kk.js": 306,
+	"./km": 307,
+	"./km.js": 307,
+	"./kn": 308,
+	"./kn.js": 308,
+	"./ko": 309,
+	"./ko.js": 309,
+	"./ky": 310,
+	"./ky.js": 310,
+	"./lb": 311,
+	"./lb.js": 311,
+	"./lo": 312,
+	"./lo.js": 312,
+	"./lt": 313,
+	"./lt.js": 313,
+	"./lv": 314,
+	"./lv.js": 314,
+	"./me": 315,
+	"./me.js": 315,
+	"./mi": 316,
+	"./mi.js": 316,
+	"./mk": 317,
+	"./mk.js": 317,
+	"./ml": 318,
+	"./ml.js": 318,
+	"./mr": 319,
+	"./mr.js": 319,
+	"./ms": 320,
+	"./ms-my": 321,
+	"./ms-my.js": 321,
+	"./ms.js": 320,
+	"./mt": 322,
+	"./mt.js": 322,
+	"./my": 323,
+	"./my.js": 323,
+	"./nb": 324,
+	"./nb.js": 324,
+	"./ne": 325,
+	"./ne.js": 325,
+	"./nl": 326,
+	"./nl-be": 327,
+	"./nl-be.js": 327,
+	"./nl.js": 326,
+	"./nn": 328,
+	"./nn.js": 328,
+	"./pa-in": 329,
+	"./pa-in.js": 329,
+	"./pl": 330,
+	"./pl.js": 330,
+	"./pt": 331,
+	"./pt-br": 332,
+	"./pt-br.js": 332,
+	"./pt.js": 331,
+	"./ro": 333,
+	"./ro.js": 333,
+	"./ru": 334,
+	"./ru.js": 334,
+	"./sd": 335,
+	"./sd.js": 335,
+	"./se": 336,
+	"./se.js": 336,
+	"./si": 337,
+	"./si.js": 337,
+	"./sk": 338,
+	"./sk.js": 338,
+	"./sl": 339,
+	"./sl.js": 339,
+	"./sq": 340,
+	"./sq.js": 340,
+	"./sr": 341,
+	"./sr-cyrl": 342,
+	"./sr-cyrl.js": 342,
+	"./sr.js": 341,
+	"./ss": 343,
+	"./ss.js": 343,
+	"./sv": 344,
+	"./sv.js": 344,
+	"./sw": 345,
+	"./sw.js": 345,
+	"./ta": 346,
+	"./ta.js": 346,
+	"./te": 347,
+	"./te.js": 347,
+	"./tet": 348,
+	"./tet.js": 348,
+	"./th": 349,
+	"./th.js": 349,
+	"./tl-ph": 350,
+	"./tl-ph.js": 350,
+	"./tlh": 351,
+	"./tlh.js": 351,
+	"./tr": 352,
+	"./tr.js": 352,
+	"./tzl": 353,
+	"./tzl.js": 353,
+	"./tzm": 354,
+	"./tzm-latn": 355,
+	"./tzm-latn.js": 355,
+	"./tzm.js": 354,
+	"./uk": 356,
+	"./uk.js": 356,
+	"./ur": 357,
+	"./ur.js": 357,
+	"./uz": 358,
+	"./uz-latn": 359,
+	"./uz-latn.js": 359,
+	"./uz.js": 358,
+	"./vi": 360,
+	"./vi.js": 360,
+	"./x-pseudo": 361,
+	"./x-pseudo.js": 361,
+	"./yo": 362,
+	"./yo.js": 362,
+	"./zh-cn": 363,
+	"./zh-cn.js": 363,
+	"./zh-hk": 364,
+	"./zh-hk.js": 364,
+	"./zh-tw": 365,
+	"./zh-tw.js": 365
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -10267,9 +10318,11 @@ webpackContext.id = 483;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Engine; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__data_records_category__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_records_account__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data_records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_utils__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__data_records_bank_link__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_records_bank_transaction__ = __webpack_require__(45);
+
 
 
 
@@ -10306,6 +10359,9 @@ var Engine = (function () {
         this.transactionUnreconciledDynamicView = this.db.transactionProcessor.table(__WEBPACK_IMPORTED_MODULE_2__data_records_transaction__["a" /* Transaction */]).addDynamicView("TransactionUnreconciled");
         this.transactionUnreconciledDynamicView.applyWhere(function (t) { return !t.x.reconciled; });
         this.transactionUnreconciledDynamicView.applySimpleSort('date', true);
+        this.bankTransactionUnreconciledDynamicView = this.db.transactionProcessor.table(__WEBPACK_IMPORTED_MODULE_5__data_records_bank_transaction__["a" /* BankTransaction */]).addDynamicView("BankTransactionUnreconciled");
+        this.bankTransactionUnreconciledDynamicView.applyWhere(function (t) { return !t.x.reconciled && !t.x.ignored; });
+        this.bankTransactionUnreconciledDynamicView.applySimpleSort('date', true);
         this.initMidnightWatch();
     }
     Engine.prototype.initMidnightWatch = function () {
@@ -10362,11 +10418,11 @@ var Engine = (function () {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CategorySimpleWeeklyProcessor; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__engine_processor__ = __webpack_require__(372);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__engine_processor__ = __webpack_require__(373);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_moment__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_big_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_utils__ = __webpack_require__(15);
@@ -10424,10 +10480,10 @@ var CategorySimpleWeeklyProcessor = (function (_super) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AccountBalanceProcessor; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__engine_processor__ = __webpack_require__(372);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__engine_processor__ = __webpack_require__(373);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__records_account__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__records_category__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__records_transaction__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_big_js__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_big_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_big_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_utils__ = __webpack_require__(15);
@@ -10955,7 +11011,7 @@ var InAppBrowserInterface = (function (_super) {
                 important: true,
                 popup: true,
                 category: 'bank-sync.' + this.monitor.bankLink.uuid + '.interactive',
-                clickAction: { type: 'custom', action: function () { return _this.confirmInteractive(); } }
+                clickAction: { type: 'custom', data: function () { return _this.confirmInteractive(); } }
             });
         }
         else {
@@ -11100,10 +11156,10 @@ var BrowserInterface = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ionic_angular__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__db_dbms__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_budget_settings_budget_settings__ = __webpack_require__(389);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pages_budget_settings_budget_settings__ = __webpack_require__(390);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__services_replication_service__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_budget_budget__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_home_home__ = __webpack_require__(77);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__data_transactions_init_budget_transaction__ = __webpack_require__(62);
@@ -11114,7 +11170,7 @@ var BrowserInterface = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__pages_notifications_notifications__ = __webpack_require__(400);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__modals_share_budget_share_budget__ = __webpack_require__(79);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__bank_bank_sync__ = __webpack_require__(50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__bank_bank_sync_utils__ = __webpack_require__(401);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -11292,7 +11348,7 @@ var MainMenuContent = (function () {
     ], MainMenuContent.prototype, "nav", void 0);
     MainMenuContent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["m" /* Component */])({
-            selector: 'main-menu-content',template:/*ion-inline-start:"c:\working\fb\ebudget\src\components\main-menu-content\main-menu-content.html"*/'<ion-item-group *ngIf="lastOpenedBudget()">\n\n    <button ion-item detail-none menuClose (click)="isBudgetPageOpen() || openBudget(lastOpenedBudget())">Back to {{budgetName(lastOpenedBudget())}}</button>\n\n    <ion-item detail-none [menuClose]="syncing ? true : null" (click)="!syncing && shareBudget()">Share Budget...\n\n        <button ion-button *ngIf="shared" [disabled]="syncing" item-right outline (click)="sync($event);$event.stopPropagation();">Sync Now</button>\n\n    </ion-item>\n\n    <button *ngIf="isCurrentValidAutomaticBankLinks()" ion-item detail-none (click)="runBankLinks()">Sync Bank Accounts \n\n        <ion-spinner *ngIf="bankSync.activeSyncs.length" name="bubbles" style="position:absolute; top:0; bottom:0; margin-top:auto; margin-bottom:auto;"></ion-spinner>\n\n    </button>\n\n    <button ion-item menuClose (click)="goBudgetSettings()">Budget Settings</button>\n\n</ion-item-group>\n\n<ion-item-group *ngIf="notifications.notifications.length">\n\n    <ion-item-divider light>\n\n        Notifications <ion-badge *ngIf="notifications.newNotifications.length > 3">{{notifications.newNotifications.length}}</ion-badge>\n\n        <button ion-button item-right outline [disabled]="!notifications.newNotifications.length" (click)="notifications.clear(3)" (press)="notifications.clear()">Clear</button><button ion-button item-right outline menuClose (click)="goNotifications()">Show All</button>\n\n    </ion-item-divider>\n\n    <ion-item *ngIf="!notifications.newNotifications.length"><ion-note>No New Notifications</ion-note></ion-item>\n\n    <notification-list *ngIf="notifications.newNotifications.length" new="true" limit="3"></notification-list>\n\n</ion-item-group>\n\n<ion-item-group>\n\n    <ion-item-divider light>\n\n        Open\n\n    </ion-item-divider>\n\n    <button ion-item [class.selectedBudget]="b == lastOpenedBudget()" menuClose *ngFor="let b of budgets" (click)="openBudget(b)">{{budgetName(b)}}</button>\n\n    <button ion-item menuClose detail-none (click)="addBudget()">Create New Budget...</button>\n\n    <button ion-item menuClose detail-none (click)="linkBudget()">Open a Shared Budget...</button>\n\n</ion-item-group>\n\n<ion-item-group>\n\n    <ion-item-divider light>\n\n        Options\n\n    </ion-item-divider>\n\n    <button id="main-menu-home" ion-item menuClose (click)="goHome()">Home</button>\n\n    <button ion-item menuClose (click)="goDev()">Dev</button>\n\n    <button ion-item menuClose (click)="goSettings()">Settings</button>\n\n    <button ion-item menuClose (click)="goAbout()">About</button>\n\n</ion-item-group>'/*ion-inline-end:"c:\working\fb\ebudget\src\components\main-menu-content\main-menu-content.html"*/
+            selector: 'main-menu-content',template:/*ion-inline-start:"c:\working\fb\ebudget\src\components\main-menu-content\main-menu-content.html"*/'<ion-item-group *ngIf="lastOpenedBudget()">\n\n    <button ion-item detail-none menuClose (click)="isBudgetPageOpen() || openBudget(lastOpenedBudget())">Back to {{budgetName(lastOpenedBudget())}}</button>\n\n    <ion-item detail-none [menuClose]="syncing ? true : null" (click)="!syncing && shareBudget()">Share Budget...\n\n        <button ion-button *ngIf="shared" [disabled]="syncing" item-right outline (click)="sync($event);$event.stopPropagation();">Sync Now</button>\n\n    </ion-item>\n\n    <button *ngIf="isCurrentValidAutomaticBankLinks()" ion-item detail-none (click)="runBankLinks()">Sync Bank Accounts \n\n        <ion-spinner *ngIf="bankSync.activeSyncs.length" name="bubbles" style="position:absolute; top:0; bottom:0; margin-top:auto; margin-bottom:auto;"></ion-spinner>\n\n    </button>\n\n    <button ion-item menuClose (click)="goBudgetSettings()">Budget Settings</button>\n\n</ion-item-group>\n\n<ion-item-group *ngIf="notifications.notifications.length">\n\n    <ion-item-divider light>\n\n        Notifications <ion-badge *ngIf="notifications.newNotifications.length > 3">{{notifications.newNotifications.length}}</ion-badge>\n\n        <button ion-button item-right outline [disabled]="!notifications.newNotifications.length" (click)="notifications.clear(3)" (press)="notifications.clear()">Clear</button><button ion-button item-right outline menuClose (click)="goNotifications()">Show All</button>\n\n    </ion-item-divider>\n\n    <ion-item *ngIf="!notifications.newNotifications.length"><ion-note>No New Notifications</ion-note></ion-item>\n\n    <notification-list *ngIf="notifications.newNotifications.length" new="true" limit="3" [nav]="nav"></notification-list>\n\n</ion-item-group>\n\n<ion-item-group>\n\n    <ion-item-divider light>\n\n        Open\n\n    </ion-item-divider>\n\n    <button ion-item [class.selectedBudget]="b == lastOpenedBudget()" menuClose *ngFor="let b of budgets" (click)="openBudget(b)">{{budgetName(b)}}</button>\n\n    <button ion-item menuClose detail-none (click)="addBudget()">Create New Budget...</button>\n\n    <button ion-item menuClose detail-none (click)="linkBudget()">Open a Shared Budget...</button>\n\n</ion-item-group>\n\n<ion-item-group>\n\n    <ion-item-divider light>\n\n        Options\n\n    </ion-item-divider>\n\n    <button id="main-menu-home" ion-item menuClose (click)="goHome()">Home</button>\n\n    <button ion-item menuClose (click)="goDev()">Dev</button>\n\n    <button ion-item menuClose (click)="goSettings()">Settings</button>\n\n    <button ion-item menuClose (click)="goAbout()">About</button>\n\n</ion-item-group>'/*ion-inline-end:"c:\working\fb\ebudget\src\components\main-menu-content\main-menu-content.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__db_dbms__["a" /* Dbms */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["c" /* App */], __WEBPACK_IMPORTED_MODULE_4__services_configuration_service__["a" /* Configuration */], __WEBPACK_IMPORTED_MODULE_5__services_replication_service__["a" /* Replication */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["h" /* ModalController */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["b" /* AlertController */], __WEBPACK_IMPORTED_MODULE_0_ionic_angular__["n" /* ToastController */], __WEBPACK_IMPORTED_MODULE_6__services_notifications__["a" /* Notifications */], __WEBPACK_IMPORTED_MODULE_1__angular_core__["f" /* ApplicationRef */], __WEBPACK_IMPORTED_MODULE_16__bank_bank_sync__["a" /* BankSync */], __WEBPACK_IMPORTED_MODULE_17__engine_engine_factory__["a" /* EngineFactory */]])
     ], MainMenuContent);
@@ -11308,7 +11364,8 @@ var MainMenuContent = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NotificationList; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(4);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11318,6 +11375,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+
 
 
 var NotificationList = (function () {
@@ -11331,7 +11389,10 @@ var NotificationList = (function () {
     NotificationList.prototype.notificationClicked = function (notification) {
         if (notification.clickAction) {
             if (notification.clickAction.type === 'custom') {
-                notification.clickAction.action();
+                notification.clickAction.data();
+            }
+            else if (notification.clickAction.type === 'page-nav') {
+                this.nav.push(notification.clickAction.data.page, notification.clickAction.data.params);
             }
         }
     };
@@ -11343,9 +11404,13 @@ var NotificationList = (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["D" /* Input */])(),
         __metadata("design:type", Boolean)
     ], NotificationList.prototype, "new", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["D" /* Input */])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["j" /* NavController */])
+    ], NotificationList.prototype, "nav", void 0);
     NotificationList = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
-            selector: 'notification-list',template:/*ion-inline-start:"c:\working\fb\ebudget\src\components\notification-list\notification-list.html"*/'<ion-item *ngFor="let n of notifications | slice:0:limit" [class.unread]="!n.read" [class.notification-important]="n.important" detail-none (click)="notificationClicked(n)">{{n.message}}</ion-item>\n\n\n\n'/*ion-inline-end:"c:\working\fb\ebudget\src\components\notification-list\notification-list.html"*/
+            selector: 'notification-list',template:/*ion-inline-start:"c:\working\fb\ebudget\src\components\notification-list\notification-list.html"*/'<ion-item *ngFor="let n of notifications | slice:0:limit" [class.unread]="!n.read" [class.notification-important]="n.important" detail-none menuClose (click)="notificationClicked(n)">{{n.message}}</ion-item>\n\n\n\n'/*ion-inline-end:"c:\working\fb\ebudget\src\components\notification-list\notification-list.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__services_notifications__["a" /* Notifications */]])
     ], NotificationList);
@@ -11361,7 +11426,7 @@ var NotificationList = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MainMenuIcon; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(19);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11395,7 +11460,7 @@ var MainMenuIcon = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UpdatedCheck; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__configuration_service__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__app_app_ready__ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__logger__ = __webpack_require__(7);
@@ -12036,11 +12101,11 @@ var CuteProgressBar = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__bank_link_local__ = __webpack_require__(85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__app_app_ready__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__db_dbms__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__bank_sync__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__bank_sync_utils__ = __webpack_require__(401);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__services_notifications__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__services_logger__ = __webpack_require__(7);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -12125,7 +12190,7 @@ var BankAutoSync = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Status; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_notifications__ = __webpack_require__(19);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12155,6 +12220,75 @@ var Status = (function () {
 }());
 
 //# sourceMappingURL=status.js.map
+
+/***/ }),
+/* 527 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ReconciliationStatus; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifications__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__configuration_service__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__db_dbms__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pages_bank_account_bank_account__ = __webpack_require__(147);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+
+
+var ReconciliationStatus = (function () {
+    function ReconciliationStatus(notifications, configuration, dbms, engineFactory) {
+        var _this = this;
+        this.notifications = notifications;
+        this.configuration = configuration;
+        this.dbms = dbms;
+        this.engineFactory = engineFactory;
+        dbms.dbInitialisedObservable().subscribe(function (db) {
+            var engine = _this.engineFactory.getEngine(db);
+            engine.bankTransactionUnreconciledDynamicView.on('rebuild', function (e) {
+                if (!db.isActive())
+                    return;
+                _this.notifyReconciliationChange(engine);
+            });
+            db.on('db-activated').subscribe(function (dbEvent) {
+                if (engine.bankTransactionUnreconciledDynamicView.data().length > 0) {
+                    _this.notifyReconciliationChange(engine);
+                }
+            });
+        });
+    }
+    ReconciliationStatus.prototype.notifyReconciliationChange = function (engine) {
+        // TODO: Going to have to group and remember these by account!
+        // Or set up and manage a few views with where clauses and monitor each one, I wonder how good our "rebuild" is.
+        var accountId = engine.bankTransactionUnreconciledDynamicView.data().length > 0 ? engine.bankTransactionUnreconciledDynamicView.data()[0].accountId : null;
+        var clickAction = accountId != null ? { type: 'page-nav', data: { page: __WEBPACK_IMPORTED_MODULE_5__pages_bank_account_bank_account__["a" /* BankAccountPage */], params: { budgetId: engine.db.id, accountId: accountId } } } : undefined;
+        this.notifications.show({
+            message: engine.bankTransactionUnreconciledDynamicView.data().length + ' bank transactions to reconcile',
+            category: 'reconciliation-status',
+            budgetId: engine.db.id,
+            clickAction: clickAction
+        });
+    };
+    ReconciliationStatus = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["A" /* Injectable */])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__notifications__["a" /* Notifications */], __WEBPACK_IMPORTED_MODULE_2__configuration_service__["a" /* Configuration */], __WEBPACK_IMPORTED_MODULE_4__db_dbms__["a" /* Dbms */], __WEBPACK_IMPORTED_MODULE_3__engine_engine_factory__["a" /* EngineFactory */]])
+    ], ReconciliationStatus);
+    return ReconciliationStatus;
+}());
+
+//# sourceMappingURL=reconciliation-status.js.map
 
 /***/ })
 ],[402]);
