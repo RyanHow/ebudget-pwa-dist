@@ -3330,7 +3330,7 @@ var LoggerUINotifierAppender = (function () {
 var BuildInfo = (function () {
     function BuildInfo() {
     }
-    BuildInfo.version = '0.0.136';
+    BuildInfo.version = '0.0.137';
     BuildInfo.buildDateYYYYMMDD = '2018-01-04';
     return BuildInfo;
 }());
@@ -6631,15 +6631,36 @@ var MergeBankTransactions = (function (_super) {
     };
     MergeBankTransactions.prototype.validateChecksum = function (tp) {
         var _this = this;
-        if (!this.checksum)
+        if (!this.checksum || this.checksum.indexOf('_') > 0)
             return true;
-        var allData = tp.table(__WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__["a" /* BankTransaction */]).chain().find({ 'accountId': this.accountId }).data().filter(function (t) { return t.id < _this.id * 100000; });
-        var checksum = allData.filter(function (t) { return t.status === 'processed'; }).length + "_" + allData.filter(function (t) { return t.status === 'authorised'; }).length + "_" + allData.filter(function (t) { return t.status === 'recent'; }).length;
+        // TODO: Make this more efficient than filtering all transactions... every time ?!?
+        var bankMergeTransactionsHistory = tp.db.sortedTransactions.data().filter(function (t) { return t.typeId === _this.typeId && t.accountId === _this.accountId && t.id < _this.id; });
+        var checksum = '0';
+        bankMergeTransactionsHistory.forEach(function (t) {
+            checksum = _this.hashCode(t.id + checksum) + '';
+        });
         return this.checksum === checksum;
+        //let allData = tp.table(BankTransaction).chain().find({'accountId': <any> this.accountId}).data().filter(t => t.id < this.id * 100000);
+        //let checksum = allData.filter(t => t.status === 'processed').length + "_" + allData.filter(t => t.status === 'authorised').length + "_" + allData.filter(t => t.status === 'recent').length;
+        //return this.checksum === checksum;
+    };
+    MergeBankTransactions.prototype.hashCode = function (str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ~~(((hash << 5) - hash) + str.charCodeAt(i));
+        }
+        return hash;
     };
     MergeBankTransactions.prototype.generateChecksum = function (tp) {
-        var allData = tp.table(__WEBPACK_IMPORTED_MODULE_1__records_bank_transaction__["a" /* BankTransaction */]).chain().find({ 'accountId': this.accountId }).data();
-        this.checksum = allData.filter(function (t) { return t.status === 'processed'; }).length + "_" + allData.filter(function (t) { return t.status === 'authorised'; }).length + "_" + allData.filter(function (t) { return t.status === 'recent'; }).length;
+        var _this = this;
+        var bankMergeTransactionsHistory = tp.db.sortedTransactions.data().filter(function (t) { return t.typeId === _this.typeId && t.accountId === _this.accountId; });
+        var checksum = '0';
+        bankMergeTransactionsHistory.forEach(function (t) {
+            checksum = _this.hashCode(t.id + checksum) + '';
+        });
+        this.checksum = checksum;
+        //let allData = tp.table(BankTransaction).chain().find({'accountId': <any> this.accountId}).data();
+        //this.checksum = allData.filter(t => t.status === 'processed').length + "_" + allData.filter(t => t.status === 'authorised').length + "_" + allData.filter(t => t.status === 'recent').length;
     };
     MergeBankTransactions.prototype.update = function (tp) {
         tp.unsupported();
