@@ -25703,7 +25703,7 @@ currency-display .negative-currency {
 }
 
 [currency-field] {
-  text-align: right;
+  text-align: left;
 }
 
 error-label > div {
@@ -25897,6 +25897,51 @@ status .status-indicator {
 
 .add-edit-split-transaction-modal .reconcile-selected {
   background-color: blue;
+}
+
+.add-edit-split-transaction-modal .transaction-type-label {
+  color: #387ef5;
+}
+
+.add-edit-split-transaction-modal .item-right {
+  -webkit-box-ordinal-group: 11;
+  -webkit-order: 10;
+  -ms-flex-order: 10;
+  order: 10;
+  min-width: 18px;
+  margin-right: 0;
+  padding-right: 14px;
+  padding-left: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.add-edit-split-transaction-modal .account-select {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.add-edit-split-transaction-modal .datetime-md {
+  padding-left: 8px;
+}
+
+.add-edit-split-transaction-modal .datetime-ios {
+  padding-left: 0;
+}
+
+.add-edit-split-transaction-modal .blank-icon {
+  visibility: hidden;
+}
+
+.toolbar-category-label {
+  text-align: right;
+  padding: 0 5px;
+  margin: 0 2px;
+  font-style: italic;
+}
+
+.extended-toolbar {
+  min-height: 0;
 }
 
 .share-budget-page {
